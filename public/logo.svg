@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="36" fill="white"/>
+  <!-- Upper wing bar -->
+  <polygon points="52,48 130,36 190,44 190,58 112,68 68,62" fill="#FF7700"/>
+  <!-- Lower wing bar -->
+  <polygon points="30,82 108,70 180,76 172,92 94,100 45,96" fill="#FF7700"/>
+  <!-- Fuselage / arrow body pointing lower-left -->
+  <polygon points="100,70 120,82 86,150 68,168 54,152 80,92" fill="#FF7700"/>
+  <!-- Arrow head tip -->
+  <polygon points="54,152 40,175 68,168" fill="#FF7700"/>
+</svg>

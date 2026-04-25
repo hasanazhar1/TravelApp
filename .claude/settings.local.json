@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(npm --version)",
+      "Read(//Users/karimh/**)",
+      "Read(//opt/homebrew/**)",
+      "Bash(python3 -m pip --version)",
+      "Bash(python3 -c \"import flask\")",
+      "Bash(python3 -c \"import http.server\")",
+      "Bash(python3 -m pip install flask)",
+      "Bash(python3 server.py)",
+      "Bash(curl -s http://localhost:3000/api/trips -X POST -H \"Content-Type: application/json\" -d '{\"name\":\"Test Trip\",\"destination\":\"Paris\"}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://localhost:3000/api/trips/18d783ef/members -X POST -H 'Content-Type: application/json' -d '{\"name\":\"Omar\"}')",
+      "Bash(curl -s http://localhost:3000/api/trips/18d783ef/expenses -X POST -H 'Content-Type: application/json' -d '{\"name\":\"Flight Tickets\",\"total_amount\":800,\"paid_by\":\"c4b7e874-828b-49a5-879a-4f477f9fe0da\"}')",
+      "Bash(chmod +x /Users/karimh/Desktop/TravelApp/start.sh)",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill *)",
+      "Bash(curl -s http://localhost:3000/)",
+      "WebSearch",
+      "WebFetch(domain:serpapi.com)",
+      "WebFetch(domain:tequila.kiwi.com)",
+      "Bash(curl -s http://localhost:3000/api/flights/search?origin=JFK)",
+      "Bash(curl -s \"http://localhost:3000/api/flights/search?origin=JFK&destination=CDG&date=2026-05-01\")",
+      "Bash(curl -fsSL \"https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-arm64\" -o /Users/karimh/Desktop/TravelApp/cloudflared)",
+      "Bash(chmod +x /Users/karimh/Desktop/TravelApp/cloudflared)",
+      "Bash(curl -fsSL \"https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64.tgz\" -o /tmp/cf.tgz)",
+      "Bash(curl -sI \"https://github.com/cloudflare/cloudflared/releases/latest\")",
+      "Bash(curl -fsSL \"https://github.com/cloudflare/cloudflared/releases/download/2026.3.0/cloudflared-darwin-arm64.tgz\" -o /tmp/cf.tgz)",
+      "Bash(tar -xzf /tmp/cf.tgz -C /Users/karimh/Desktop/TravelApp/)",
+      "Bash(/Users/karimh/Desktop/TravelApp/cloudflared --version)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['flights'][0], indent=2\\)\\)\")",
+      "Bash(python3 /Users/karimh/Desktop/TravelApp/server.py)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); f=d['flights'][0]; print\\('logo:', bool\\(f.get\\('airline_logo'\\)\\), '| segments:', len\\(f.get\\('segments',[]\\)\\), '| carbon:', f.get\\('carbon_kg'\\)\\)\")",
+      "Bash(curl -s \"http://localhost:3000/api/flights/search?origin=BOS&destination=LIS&date=2026-06-01&adults=5\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); f=d['flights'][0]; print\\(f'pp: \\\\${f[\\\\\"price_per_person\\\\\"]}  total: \\\\${f[\\\\\"total_price\\\\\"]}  adults: {f[\\\\\"adults\\\\\"]}'\\)\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s http://localhost:3000/api/maps-key)"
+    ]
+  }
+}
