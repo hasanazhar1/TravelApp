@@ -81,20 +81,91 @@ init_db()
 
 COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#85C1E9']
 
-# ── SERPAPI GOOGLE FLIGHTS SEARCH ──
+# ── LOAD .env (no third-party libs needed) ──
+def _load_dotenv(path='.env'):
+    try:
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    k, v = line.split('=', 1)
+                    os.environ.setdefault(k.strip(), v.strip().strip('"\''))
+    except FileNotFoundError:
+        pass
 
-try:
-    from config import SERPAPI_KEY as _CONFIG_KEY, GOOGLE_MAPS_KEY as _CONFIG_MAPS_KEY
-except ImportError:
-    _CONFIG_KEY      = ''
-    _CONFIG_MAPS_KEY = ''
-SERPAPI_KEY      = os.environ.get('SERPAPI_KEY', _CONFIG_KEY)
-GOOGLE_MAPS_KEY  = os.environ.get('GOOGLE_MAPS_KEY', _CONFIG_MAPS_KEY)
+_load_dotenv()
+
+# ── API KEYS (read from environment / .env) ──
+SERPAPI_KEY      = os.environ.get('SERPAPI_KEY',      '')
+GOOGLE_MAPS_KEY  = os.environ.get('GOOGLE_MAPS_KEY',  '')
+TICKETMASTER_KEY = os.environ.get('TICKETMASTER_KEY', '')
+RAPIDAPI_KEY     = os.environ.get('RAPIDAPI_KEY',     '')
 SERPAPI_BASE     = 'https://serpapi.com/search'
+TM_BASE          = 'https://app.ticketmaster.com/discovery/v2'
+BOOKING_BASE     = 'https://booking-com.p.rapidapi.com/v1'
 
 @app.get('/api/maps-key')
 def get_maps_key():
     return jsonify(key=GOOGLE_MAPS_KEY)
+
+# ── TICKETMASTER EVENT SEARCH ──
+
+@app.get('/api/tickets/search')
+def search_tickets():
+    key = TICKETMASTER_KEY
+    if not key:
+        return jsonify(error='no_key'), 503
+
+    keyword = request.args.get('keyword', '').strip()
+    city    = request.args.get('city', '').strip()
+    if not keyword and not city:
+        return jsonify(error='keyword or city required'), 400
+
+    try:
+        params = {
+            'apikey': key,
+            'size': 12,
+            'sort': 'date,asc',
+        }
+        if keyword: params['keyword'] = keyword
+        if city:    params['city']    = city
+
+        qs  = urllib.parse.urlencode(params)
+        req = urllib.request.Request(f'{TM_BASE}/events.json?{qs}', method='GET')
+        with urllib.request.urlopen(req, timeout=12, context=SSL_CTX) as resp:
+            data = json.loads(resp.read())
+
+        events = []
+        for ev in (data.get('_embedded') or {}).get('events', []):
+            venue   = ((ev.get('_embedded') or {}).get('venues') or [{}])[0]
+            dates   = ev.get('dates', {}).get('start', {})
+            prices  = ev.get('priceRanges', [])
+            images  = ev.get('images', [])
+            thumb   = next((i['url'] for i in images if i.get('ratio') == '3_2' and i.get('width', 0) >= 300), '')
+            if not thumb and images:
+                thumb = images[0].get('url', '')
+            events.append({
+                'id':        ev.get('id', ''),
+                'name':      ev.get('name', ''),
+                'url':       ev.get('url', ''),
+                'date':      dates.get('localDate', ''),
+                'time':      dates.get('localTime', ''),
+                'venue':     venue.get('name', ''),
+                'city':      (venue.get('city') or {}).get('name', ''),
+                'country':   (venue.get('country') or {}).get('name', ''),
+                'price_min': prices[0].get('min') if prices else None,
+                'price_max': prices[0].get('max') if prices else None,
+                'currency':  prices[0].get('currency', 'USD') if prices else 'USD',
+                'thumbnail': thumb,
+                'genre':     ((ev.get('classifications') or [{}])[0].get('genre') or {}).get('name', ''),
+            })
+
+        return jsonify(events=events)
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        return jsonify(error=f'Ticketmaster error {e.code}', detail=body), 502
+    except Exception as e:
+        return jsonify(error=str(e)), 500
 
 def format_minutes(total_mins):
     h, m = divmod(int(total_mins), 60)
@@ -219,8 +290,15 @@ def search_flights():
     except urllib.error.HTTPError as e:
         body = e.read().decode()
         return jsonify(error=f'SerpAPI error {e.code}', detail=body), 502
-    except Exception as e:
+    except (TimeoutError, OSError) as e:
+        if 'timed out' in str(e).lower():
+            return jsonify(error='The read operation timed out'), 504
         return jsonify(error=str(e)), 500
+    except Exception as e:
+        msg = str(e)
+        if 'timed out' in msg.lower():
+            return jsonify(error='The read operation timed out'), 504
+        return jsonify(error=msg), 500
 
 # ── LODGING SEARCH ──
 
@@ -306,6 +384,122 @@ def search_lodging():
     except urllib.error.HTTPError as e:
         body = e.read().decode()
         return jsonify(error=f'SerpAPI error {e.code}', detail=body), 502
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
+# ── BOOKING.COM LODGING ──
+
+def booking_request(path, params):
+    qs  = urllib.parse.urlencode(params)
+    req = urllib.request.Request(
+        f'{BOOKING_BASE}{path}?{qs}',
+        headers={
+            'X-RapidAPI-Key':  RAPIDAPI_KEY,
+            'X-RapidAPI-Host': 'booking-com.p.rapidapi.com',
+        },
+        method='GET'
+    )
+    with urllib.request.urlopen(req, timeout=15, context=SSL_CTX) as resp:
+        return json.loads(resp.read())
+
+@app.get('/api/booking/search')
+def booking_search():
+    if not RAPIDAPI_KEY:
+        return jsonify(error='no_key'), 503
+
+    limit_msg = is_rate_limited(request.remote_addr)
+    if limit_msg:
+        return jsonify(error=limit_msg), 429
+
+    destination = request.args.get('destination', '').strip()
+    check_in    = request.args.get('check_in', '').strip()
+    check_out   = request.args.get('check_out', '').strip()
+    adults      = int(request.args.get('adults', 2))
+    rooms       = int(request.args.get('rooms', 1))
+
+    if not destination or not check_in or not check_out:
+        return jsonify(error='destination, check_in, and check_out are required'), 400
+
+    try:
+        # Step 1: resolve destination → dest_id
+        loc_data = booking_request('/hotels/locations', {
+            'name':   destination,
+            'locale': 'en-gb',
+        })
+        if not loc_data:
+            return jsonify(error='Destination not found'), 404
+
+        dest    = loc_data[0]
+        dest_id = dest.get('dest_id') or dest.get('city_ufi')
+        dest_type = dest.get('dest_type', 'city')
+
+        # Step 2: search hotels
+        hotels_data = booking_request('/hotels/search', {
+            'dest_id':           dest_id,
+            'dest_type':         dest_type,
+            'checkin_date':      check_in,
+            'checkout_date':     check_out,
+            'adults_number':     adults,
+            'room_number':       rooms,
+            'locale':            'en-gb',
+            'currency':          'USD',
+            'order_by':          'popularity',
+            'filter_by_currency':'USD',
+            'units':             'metric',
+            'page_number':       0,
+        })
+
+        results = []
+        for h in (hotels_data.get('result') or [])[:20]:
+            price_raw  = h.get('min_total_price') or h.get('price_breakdown', {}).get('gross_price')
+            price_night = None
+            if price_raw:
+                try:
+                    nights = (
+                        (__import__('datetime').date.fromisoformat(check_out) -
+                         __import__('datetime').date.fromisoformat(check_in)).days or 1
+                    )
+                    price_night = round(float(price_raw) / nights, 2)
+                except Exception:
+                    pass
+
+            photos = h.get('photos') or []
+            thumb  = h.get('main_photo_url') or (photos[0].get('url_max') if photos else '')
+            all_images = [p.get('url_max') or p.get('url_original','') for p in photos[:10] if p.get('url_max') or p.get('url_original')]
+            if not all_images and thumb:
+                all_images = [thumb]
+
+            results.append({
+                'hotel_id':          h.get('hotel_id'),
+                'name':              h.get('hotel_name', ''),
+                'url':               h.get('url', ''),
+                'lat':               h.get('latitude'),
+                'lng':               h.get('longitude'),
+                'price_per_night':   price_night,
+                'price_per_night_str': f'${price_night:.0f}' if price_night else '',
+                'total_price':       float(price_raw) if price_raw else 0,
+                'total_price_str':   f'${float(price_raw):.0f}' if price_raw else '',
+                'rating':            h.get('review_score'),
+                'rating_word':       h.get('review_score_word', ''),
+                'reviews':           h.get('review_nr', 0),
+                'stars':             int(h.get('class') or 0),
+                'address':           h.get('address', ''),
+                'city':              h.get('city', ''),
+                'country':           h.get('country_trans', ''),
+                'thumbnail':         thumb,
+                'images':            all_images,
+                'amenities':         [],
+                'description':       h.get('qualitative_description', ''),
+                'is_free_cancellable': h.get('is_free_cancellable', False),
+                'breakfast_included': h.get('is_breakfast_included', False),
+            })
+
+        return jsonify(lodging=results, source='booking')
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        if e.code == 429:
+            return jsonify(error='rate_limit', message='Too many requests — the Booking.com API rate limit was hit. Please wait a moment and try again.'), 429
+        return jsonify(error=f'Booking.com error {e.code}', detail=body), 502
     except Exception as e:
         return jsonify(error=str(e)), 500
 
