@@ -5,28 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TripSplit — Group Travel Budget</title>
   <style>
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Light.otf') format('opentype'); font-weight: 300; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Semibold.otf') format('opentype'); font-weight: 600; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Semibold.otf') format('opentype'); font-weight: 600; font-style: normal; }
+    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f7f7f5;
+      --bg: #ffffff;
       --surface: #ffffff;
-      --surface2: #f0efec;
-      --border: #e0ddd8;
-      --accent: #f97316;
-      --accent2: #ea580c;
+      --surface2: #ffffff;
+      --border: #e8e8e8;
+      --accent: #36A6FF;
+      --accent2: #1a8fe8;
       --green: #16a34a;
       --red: #dc2626;
       --yellow: #d97706;
       --text: #1a1a1a;
       --text2: #6b7280;
       --radius: 14px;
+      /* Airbnb-style elevation shadows */
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.04);
+      --shadow-sm: 0 2px 6px rgba(0,0,0,0.06), 0 4px 14px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 8px 24px rgba(0,0,0,0.05);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.09), 0 16px 48px rgba(0,0,0,0.06);
     }
 
     body {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      background: #f7f7f5;
+      font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
-      color: #1a1a1a;
       color: var(--text);
       min-height: 100vh;
     }
@@ -40,7 +53,7 @@
       min-height: 100vh;
       padding: 2rem;
       gap: 2rem;
-      background: #FF7700;
+      background: #36A6FF;
     }
 
     .hero {
@@ -81,6 +94,7 @@
       padding: 2rem;
       flex: 1;
       min-width: 280px;
+      box-shadow: var(--shadow-sm);
     }
 
     .card h2 {
@@ -95,7 +109,7 @@
     input, select {
       width: 100%;
       background: #ffffff;
-      border: 1px solid #111111;
+      border: 1px solid #d1d0ce;
       border-radius: 8px;
       color: var(--text);
       padding: 0.75rem 1rem;
@@ -254,6 +268,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+      box-shadow: var(--shadow-sm);
     }
 
     .panel-header {
@@ -324,32 +339,88 @@
 
     /* ── SUMMARY CARDS ── */
     .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
       margin-bottom: 1.5rem;
     }
 
-    @media (max-width: 500px) { .summary-grid { grid-template-columns: 1fr; } }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem;
+    .stat-total-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
     }
 
-    .stat-label {
+    .stat-total-label {
       font-size: 0.78rem;
       color: var(--text2);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.4rem;
+      letter-spacing: 0.06em;
+      font-weight: 600;
     }
 
-    .stat-value {
-      font-size: 1.6rem;
+    .stat-total-value {
+      font-size: 2.8rem;
       font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-owed-sub {
+      font-size: 0.82rem;
+      color: var(--red);
+      font-weight: 500;
+    }
+
+    .stat-owed-sub.settled {
+      color: var(--green);
+    }
+
+    /* ── ANIMATED LIST (ReactBits port) ── */
+    @keyframes expenseIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1);   }
+    }
+
+    .expense-card {
+      opacity: 0;
+      transform: scale(0.7);
+      transform-origin: top center;
+    }
+
+    .expense-card.al-visible {
+      animation: expenseIn 0.2s ease forwards;
+    }
+
+    #expenses-list-wrap {
+      position: relative;
+    }
+
+    #expenses-list-wrap .al-gradient-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50px;
+      background: linear-gradient(to bottom, var(--bg), transparent);
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 2;
+    }
+
+    #expenses-list-wrap .al-gradient-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 80px;
+      background: linear-gradient(to top, var(--bg), transparent);
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 2;
+    }
+
+    #expenses-list {
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 2px 2px 4px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
     }
 
     /* ── EXPENSES ── */
@@ -362,16 +433,36 @@
 
     .expenses-header h2 { font-size: 1.1rem; font-weight: 700; }
 
+    .expense-section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      padding: 0.25rem 0 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .expense-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
     .expense-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       margin-bottom: 1rem;
       overflow: hidden;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      box-shadow: var(--shadow-xs);
     }
 
-    .expense-card:hover { border-color: var(--accent); }
+    .expense-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
 
     .expense-header {
       padding: 1rem 1.25rem;
@@ -381,17 +472,18 @@
       gap: 1rem;
     }
 
-    .expense-title { font-weight: 600; font-size: 1rem; }
+    .expense-title { font-weight: 400; font-size: 1rem; }
 
     .expense-amount {
       font-size: 1.1rem;
       font-weight: 700;
-      color: var(--accent);
+      color: var(--text);
       white-space: nowrap;
     }
 
     .expense-meta {
       font-size: 0.8rem;
+      font-weight: 400;
       color: var(--text2);
       margin-top: 0.15rem;
     }
@@ -428,15 +520,15 @@
 
     .split-chip:hover { transform: translateY(-1px); }
 
-    .split-name { font-size: 0.85rem; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .split-name { font-size: 0.85rem; font-weight: 400; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .split-amount { font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+    .split-amount { font-size: 0.85rem; font-weight: 700; color: var(--text); white-space: nowrap; }
 
     .split-status {
       font-size: 0.75rem;
       padding: 0.15rem 0.4rem;
       border-radius: 4px;
-      font-weight: 600;
+      font-weight: 400;
     }
 
     .status-paid { color: var(--green); background: rgba(38,222,129,0.15); }
@@ -446,6 +538,127 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+
+    /* ── TICKETMASTER ── */
+
+    .tm-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .tm-modal-overlay.open { display: flex; }
+
+    .tm-modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .tm-header {
+      padding: 1.1rem 1.25rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .tm-header-logo {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #026CDF;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: #e8f1fc;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .tm-search-row {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tm-search-row input {
+      flex: 1;
+      margin: 0;
+      height: 38px;
+      padding: 0 0.75rem;
+      font-size: 0.88rem;
+    }
+    .tm-search-btn {
+      background: #026CDF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .tm-results {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0.75rem 1.25rem 1.25rem;
+    }
+    .tm-event-card {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      box-shadow: var(--shadow-xs);
+    }
+    .tm-event-card:hover { border-color: #026CDF; background: #f0f6ff; box-shadow: var(--shadow-sm); }
+    .tm-event-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface2);
+    }
+    .tm-event-thumb-placeholder {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.4rem;
+    }
+    .tm-event-info { flex: 1; min-width: 0; }
+    .tm-event-name { font-weight: 600; font-size: 0.9rem; color: var(--text); line-height: 1.3; }
+    .tm-event-meta { font-size: 0.78rem; color: var(--text2); margin-top: 0.2rem; }
+    .tm-event-price { font-size: 0.82rem; font-weight: 700; color: #026CDF; margin-top: 0.25rem; }
+    .tm-empty { text-align: center; padding: 2rem; color: var(--text2); font-size: 0.9rem; }
+    .tm-close-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.1rem 0.3rem;
     }
 
     /* ── MODAL ── */
@@ -471,6 +684,7 @@
       max-width: 520px;
       max-height: 90vh;
       overflow-y: auto;
+      box-shadow: var(--shadow-lg);
     }
 
     .modal h2 {
@@ -605,7 +819,7 @@
       height: 100%;
       background: var(--accent);
       border-radius: 2px;
-      transition: width 0.3s;
+      transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
     }
 
     .no-members-warning {
@@ -619,18 +833,6 @@
     }
 
     /* ── FLIGHT SEARCH ── */
-    .flight-search-bar {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr auto auto;
-      gap: 0.6rem;
-      align-items: end;
-      margin-bottom: 1.25rem;
-    }
-
-    @media (max-width: 640px) {
-      .flight-search-bar { grid-template-columns: 1fr 1fr; }
-    }
-
     .flight-search-bar .form-group { margin-bottom: 0; }
 
     .flight-result {
@@ -643,10 +845,11 @@
       align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow-xs);
     }
 
-    .flight-result:hover { border-color: var(--accent); }
+    .flight-result:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
 
     .flight-airline {
       font-weight: 700;
@@ -664,6 +867,7 @@
       align-items: center;
       gap: 0.5rem;
       flex: 1;
+      min-width: 0;
     }
 
     .flight-iata {
@@ -677,7 +881,15 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.1rem;
+      gap: 0.15rem;
+      flex: 1;
+      min-width: 80px;
+    }
+    .flight-arrow-line {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      display: block;
     }
 
     .flight-duration {
@@ -714,34 +926,34 @@
     }
 
     .flight-add-btn {
-      background: var(--accent);
-      color: white;
+      background: none;
+      color: var(--text);
       border: none;
-      border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      font-size: 1.25rem;
-      font-weight: 700;
+      border-radius: 0;
+      width: auto;
+      height: auto;
+      font-size: 1.4rem;
+      font-weight: 400;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: opacity 0.2s;
+      transition: opacity 0.15s;
       line-height: 1;
-      padding: 0;
+      padding: 0 0.2rem;
     }
 
-    .flight-add-btn:hover { opacity: 0.85; }
-    .flight-add-btn:disabled { opacity: 0.4; cursor: default; }
+    .flight-add-btn:hover { opacity: 0.5; }
+    .flight-add-btn:disabled { opacity: 0.25; cursor: default; }
 
     .flight-result-top {
-      border: 2px solid #16a34a !important;
-      background: #f0fdf4 !important;
+      border: 1px solid var(--accent) !important;
+      background: var(--surface) !important;
     }
     .flight-top-badge {
       display: inline-block;
-      background: #16a34a;
+      background: var(--accent);
       color: white;
       font-size: 0.7rem;
       font-weight: 700;
@@ -750,18 +962,12 @@
       margin-bottom: 0.4rem;
       letter-spacing: 0.03em;
     }
-    .flight-result-top .flight-airline,
-    .flight-result-top .flight-airline-sub,
-    .flight-result-top .flight-iata,
-    .flight-result-top .flight-times,
-    .flight-result-top .flight-price-main,
-    .flight-result-top .flight-price-sub { color: #111 !important; }
-    .flight-result .flight-airline { color: #111; }
-    .flight-result .flight-airline-sub { color: #333; }
-    .flight-result .flight-iata { color: #111; }
-    .flight-result .flight-times { color: #222; }
-    .flight-result .flight-price-main { color: #111; }
-    .flight-result .flight-price-sub { color: #444; }
+    .flight-result .flight-airline { color: var(--text); }
+    .flight-result .flight-airline-sub { color: var(--text2); }
+    .flight-result .flight-iata { color: var(--text); }
+    .flight-result .flight-times { color: var(--text); }
+    .flight-result .flight-price-main { color: var(--text); }
+    .flight-result .flight-price-sub { color: var(--text2); }
 
     .flight-logo-wrap {
       display: flex;
@@ -893,7 +1099,7 @@
     .btn-outline-accent {
       background: #ffffff;
       color: #111111;
-      border: 1px solid #111111;
+      border: 1px solid #d1d0ce;
       border-radius: 8px;
       padding: 0.6rem 1.1rem;
       font-size: 0.88rem;
@@ -906,7 +1112,7 @@
       gap: 0.4rem;
     }
 
-    .btn-outline-accent:hover { background: #111111; color: white; }
+    .btn-outline-accent:hover { background: var(--accent); color: white; border-color: var(--accent); }
     .btn-outline-accent:hover svg { stroke: white; }
 
     /* ── AIRPORT AUTOCOMPLETE ── */
@@ -916,7 +1122,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      box-shadow: var(--shadow-lg);
       z-index: 99999;
       max-height: 280px;
       overflow-y: auto;
@@ -962,14 +1168,10 @@
 
     .airport-input-wrap input {
       flex: 1;
-      padding-right: 2rem;
     }
 
     .airport-input-wrap input[readonly] {
-      background: var(--surface2);
-      color: var(--text);
-      cursor: default;
-      font-weight: 600;
+      display: none; /* replaced by .airport-chip */
     }
 
     .airport-clear {
@@ -987,6 +1189,186 @@
 
     .airport-clear:hover { color: var(--red); }
     .airport-clear.visible { display: block; }
+
+    /* ── MULTI-LEG FLIGHT ROWS ── */
+    .flight-leg-row {
+      display: grid;
+      grid-template-columns: 68px 1fr 1fr 1fr 68px 28px;
+      gap: 0.65rem;
+      align-items: end;
+      margin-bottom: 0.65rem;
+      background: #f7f7f7;
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      box-shadow: var(--shadow-xs);
+    }
+    @media (max-width: 800px) {
+      .flight-leg-row { grid-template-columns: 1fr 1fr 1fr; }
+      .leg-label, .leg-remove-btn { display: none; }
+    }
+
+    /* ── AIRPORT SELECTION CHIP ── */
+    .airport-chip {
+      display: none;
+      align-items: center;
+      gap: 0.35rem;
+      background: #fff;
+      border: 1px solid #d1d0ce;
+      border-radius: 8px;
+      padding: 0 0.7rem;
+      height: 38px;
+      font-size: 0.875rem;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .airport-chip.visible { display: flex; }
+    .chip-iata {
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .chip-loc {
+      color: var(--text2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      font-weight: 400;
+    }
+    .chip-clear {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 0.82rem;
+      padding: 0;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-left: 0.15rem;
+      transition: color 0.12s;
+    }
+    .chip-clear:hover { color: var(--red); }
+    .leg-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 0.45rem;
+      white-space: nowrap;
+    }
+    .leg-remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 1rem;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      padding: 0;
+    }
+    .leg-remove-btn:hover { background: #fee2e2; color: var(--red); }
+    .flight-legs-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .add-leg-btn {
+      background: none;
+      border: 1.5px dashed var(--border);
+      color: var(--text2);
+      border-radius: 10px;
+      padding: 0.42rem 0.9rem;
+      font-size: 0.84rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .add-leg-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .flight-leg-results-header {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 1.1rem 0 0.45rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── CUSTOM DATE PICKER ── */
+    .dp-wrap { position: relative; }
+    .dp-input { cursor: pointer; caret-color: transparent; user-select: none; }
+    .dp-popup {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1rem 1rem 0.8rem;
+      box-shadow: var(--shadow-lg);
+      width: 272px;
+    }
+    .dp-popup.open { display: block; }
+    .dp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+    .dp-month-label { font-size: 0.92rem; font-weight: 600; }
+    .dp-nav {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      color: var(--text2);
+      line-height: 1;
+      transition: background 0.12s;
+    }
+    .dp-nav:hover { background: #f0f0f0; }
+    .dp-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      margin-bottom: 0.25rem;
+    }
+    .dp-day-name {
+      text-align: center;
+      font-size: 0.67rem;
+      font-weight: 600;
+      color: var(--text2);
+      padding: 0.15rem 0 0.35rem;
+    }
+    .dp-day {
+      text-align: center;
+      font-size: 0.81rem;
+      padding: 0.2rem 0;
+      cursor: pointer;
+      border-radius: 50%;
+      line-height: 2;
+      transition: background 0.1s;
+      color: var(--text);
+    }
+    .dp-day:hover:not(.dp-empty):not(.dp-disabled) { background: #e8e8e8; border-radius: 50%; }
+    .dp-day.dp-selected { background: var(--accent); color: #fff; border-radius: 50%; }
+    .dp-day.dp-today { font-weight: 700; }
+    .dp-day.dp-other-month { color: #ccc; }
+    .dp-day.dp-empty, .dp-day.dp-blank { cursor: default; }
+    .dp-day.dp-disabled { color: #d0d0d0; cursor: not-allowed; }
 
     /* SerpAPI key input row */
     .key-row {
@@ -1038,6 +1420,7 @@
       overflow: hidden;
       height: 100%;
       border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
     }
     .lodging-list {
       overflow-y: auto;
@@ -1048,7 +1431,7 @@
     }
     .lodging-card {
       background: var(--surface);
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 0.85rem 1rem;
       cursor: pointer;
@@ -1056,12 +1439,13 @@
       display: flex;
       gap: 0.75rem;
       align-items: flex-start;
+      box-shadow: var(--shadow-xs);
     }
-    .lodging-card:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(249,115,22,0.1); }
-    .lodging-card.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
-    .lodging-card.suggested { border-color: #16a34a; background: #f0fdf4; }
+    .lodging-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); }
+    .lodging-card.active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(54,166,255,0.15), var(--shadow-sm); }
+    .lodging-card.suggested { border-color: var(--green); background: #f0fdf4; }
     .lodging-suggested-badge {
-      display: inline-block; background: #16a34a; color: white;
+      display: inline-block; background: var(--green); color: white;
       font-size: 0.68rem; font-weight: 700; border-radius: 20px;
       padding: 0.1rem 0.5rem; margin-bottom: 0.25rem; letter-spacing: 0.03em;
     }
@@ -1088,14 +1472,14 @@
     .lodging-name {
       font-weight: 700;
       font-size: 0.9rem;
-      color: #111;
+      color: var(--text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .lodging-meta {
       font-size: 0.78rem;
-      color: #444;
+      color: var(--text2);
       margin-top: 0.2rem;
     }
     .lodging-amenities {
@@ -1109,7 +1493,7 @@
       border-radius: 20px;
       padding: 0.1rem 0.5rem;
       font-size: 0.7rem;
-      color: #333;
+      color: var(--text2);
     }
     .lodging-price {
       text-align: right;
@@ -1118,11 +1502,11 @@
     .lodging-price-main {
       font-size: 1rem;
       font-weight: 800;
-      color: #111;
+      color: var(--text);
     }
     .lodging-price-sub {
       font-size: 0.72rem;
-      color: #555;
+      color: var(--text2);
     }
     .lodging-add-btn {
       background: var(--accent);
@@ -1159,7 +1543,7 @@
     .lodging-filter-label {
       font-size: 0.8rem;
       font-weight: 600;
-      color: #333;
+      color: var(--text2);
       white-space: nowrap;
     }
     #price-histogram-section {
@@ -1170,7 +1554,7 @@
     #price-histogram-section .hist-label {
       font-size: 0.78rem;
       font-weight: 700;
-      color: #333;
+      color: var(--text2);
       margin-bottom: 0.5rem;
       display: flex;
       justify-content: space-between;
@@ -1189,7 +1573,7 @@
       height: 0;
       transition: height 0.55s cubic-bezier(.22,1,.36,1), background 0.2s;
       cursor: pointer;
-      background: #e0ddd8;
+      background: var(--border);
     }
     .hist-bar.in-range { background: var(--accent); }
     #hist-track-wrap {
@@ -1201,7 +1585,7 @@
       position: absolute;
       left: 0; right: 0;
       top: 50%; height: 4px;
-      background: #e0ddd8;
+      background: var(--border);
       border-radius: 2px;
       transform: translateY(-50%);
     }
@@ -1225,12 +1609,12 @@
       z-index: 2;
       transition: box-shadow 0.15s;
     }
-    .hist-handle:active { cursor: grabbing; box-shadow: 0 0 0 5px rgba(249,115,22,0.18); }
+    .hist-handle:active { cursor: grabbing; box-shadow: 0 0 0 5px rgba(255,119,0,0.18); }
     #hist-price-labels {
       display: flex;
       justify-content: space-between;
       font-size: 0.73rem;
-      color: #555;
+      color: var(--text2);
       margin-top: 2px;
     }
     .no-flight-banner {
@@ -1247,7 +1631,7 @@
     /* slideshow */
     .lodge-slideshow {
       position: relative; width: 100%; height: 220px;
-      border-radius: 12px; overflow: hidden; background: #111; flex-shrink: 0;
+      border-radius: 12px; overflow: hidden; background: var(--bg); flex-shrink: 0;
     }
     .lodge-slide { display: none; width: 100%; height: 100%; object-fit: cover; }
     .lodge-slide.active { display: block; }
@@ -1274,15 +1658,15 @@
       height: 100%; overflow-y: auto; padding-right: 2px;
     }
     .lodge-detail-header { display: flex; justify-content: space-between; align-items: flex-start; }
-    .lodge-detail-name { font-size: 1rem; font-weight: 800; color: #111; }
-    .lodge-detail-stars { color: #f59e0b; font-size: 0.9rem; }
+    .lodge-detail-name { font-size: 1rem; font-weight: 800; color: var(--text); }
+    .lodge-detail-stars { color: var(--yellow); font-size: 0.9rem; }
     .lodge-detail-price { font-size: 1.8rem; font-weight: 800; color: #111; line-height: 1; }
-    .lodge-detail-price-sub { font-size: 0.82rem; color: #555; margin-top: 0.2rem; }
-    .lodge-detail-desc { font-size: 0.83rem; color: #333; line-height: 1.55; }
+    .lodge-detail-price-sub { font-size: 0.82rem; color: var(--text2); margin-top: 0.2rem; }
+    .lodge-detail-desc { font-size: 0.83rem; color: var(--text2); line-height: 1.55; }
     .lodge-amenity-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0.35rem 0; border-bottom: 1px solid var(--border);
-      font-size: 0.82rem; color: #222;
+      font-size: 0.82rem; color: var(--text);
     }
     .lodge-amenity-row:last-child { border-bottom: none; }
     .lodge-amenity-icon { font-size: 1.1rem; }
@@ -1351,7 +1735,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      box-shadow: var(--shadow-lg);
       z-index: 9999;
       max-height: 240px;
       overflow-y: auto;
@@ -1449,7 +1833,7 @@
             <div id="dest-drop"></div>
           </div>
         </div>
-        <button class="btn-primary" onclick="createTrip()">Create Trip →</button>
+        <button class="btn-primary" onclick="createTrip()">Create Trip</button>
       </div>
     </div>
 
@@ -1457,7 +1841,7 @@
       <h2>Join Existing Trip</h2>
       <div class="input-group">
         <input type="text" id="join-trip-id" placeholder="Trip code" />
-        <button class="btn-primary" onclick="joinTrip()">Join Trip →</button>
+        <button class="btn-primary" onclick="joinTrip()">Join Trip</button>
       </div>
     </div>
   </div>
@@ -1467,7 +1851,7 @@
 <div id="app">
   <div class="topbar">
     <div class="topbar-left">
-      <button class="back-btn" onclick="goHome()">← Home</button>
+      <button class="back-btn" onclick="goHome()">Home</button>
       <span style="color:var(--border)">|</span>
       <div>
         <div class="trip-name" id="trip-name-display"></div>
@@ -1513,17 +1897,10 @@
     <div>
       <!-- Summary -->
       <div class="summary-grid" id="summary-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total Trip Cost</div>
-          <div class="stat-value" id="stat-total">$0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Paid So Far</div>
-          <div class="stat-value" style="color:var(--green)" id="stat-paid">$0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Still Owed</div>
-          <div class="stat-value" style="color:var(--red)" id="stat-owed">$0</div>
+        <div class="stat-total-wrap">
+          <div class="stat-total-label">Total Trip Cost</div>
+          <div class="stat-total-value" id="stat-total">$0</div>
+          <div class="stat-owed-sub" id="stat-owed-sub"></div>
         </div>
       </div>
 
@@ -1537,7 +1914,15 @@
         </div>
       </div>
 
-      <div id="expenses-list"></div>
+      <!-- Flights: static, always visible -->
+      <div id="flights-list"></div>
+
+      <!-- Expenses: scrollable with animated list -->
+      <div id="expenses-list-wrap">
+        <div class="al-gradient-top" id="al-grad-top" style="opacity:0"></div>
+        <div id="expenses-list"></div>
+        <div class="al-gradient-bottom" id="al-grad-bottom" style="opacity:0"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1553,7 +1938,30 @@
 
     <div class="form-group">
       <label>Expense Name</label>
-      <input type="text" id="exp-name" placeholder="Flight Tickets, Hotel, Dinner..." />
+      <div style="position:relative;display:flex;align-items:center">
+        <input type="text" id="exp-name" placeholder="Flight Tickets, Hotel, Dinner..." style="width:100%;padding-right:2.6rem" />
+        <!-- Combined service button -->
+        <div style="position:absolute;right:8px;display:flex;align-items:center">
+          <button onclick="toggleServiceDrop(event)" type="button" title="Search services" style="position:relative;width:36px;height:22px;background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center">
+            <!-- Uber logo (behind) -->
+            <img src="/uber-logo-uber-icon-transparent-free-png.webp" width="22" height="22" style="border-radius:50%;display:block;position:absolute;left:0;box-shadow:0 0 0 1.5px white" alt="Uber" />
+            <!-- Ticketmaster logo (front, overlapping) -->
+            <img src="/t_logo.png" width="22" height="22" style="border-radius:50%;display:block;position:absolute;left:14px;box-shadow:0 0 0 1.5px white" alt="Ticketmaster" />
+          </button>
+        </div>
+
+        <!-- Service dropdown -->
+        <div id="service-drop" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #d1d0ce;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.05);z-index:50;min-width:180px;overflow:hidden">
+          <div onclick="openTMSearch()" style="display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem;cursor:pointer;border-bottom:1px solid #f0efec" onmouseover="this.style.background='#f5f9ff'" onmouseout="this.style.background=''">
+            <img src="/t_logo.png" width="24" height="24" style="border-radius:50%;flex-shrink:0" />
+            <span style="font-weight:700;font-size:0.88rem;color:#111">Ticketmaster</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem;cursor:not-allowed;opacity:0.45">
+            <img src="/uber-logo-uber-icon-transparent-free-png.webp" width="24" height="24" style="border-radius:50%;flex-shrink:0" />
+            <span style="font-weight:700;font-size:0.88rem;color:#111">Uber</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
@@ -1580,35 +1988,43 @@
   </div>
 </div>
 
+<!-- TICKETMASTER MODAL -->
+<div class="tm-modal-overlay" id="tm-modal">
+  <div class="tm-modal">
+    <div class="tm-header">
+      <span class="tm-header-logo">Ticketmaster</span>
+      <span style="font-size:0.88rem;font-weight:600;color:var(--text)">Find an Event</span>
+      <button class="tm-close-btn" onclick="closeTMModal()">×</button>
+    </div>
+    <div class="tm-search-row" style="flex-direction:column;gap:0.5rem">
+      <!-- City searchable input -->
+      <div style="position:relative;width:100%" id="tm-city-wrap">
+        <input type="text" id="tm-city-input" placeholder="Type a city or country…" autocomplete="off"
+          oninput="filterTMCities()" onfocus="filterTMCities()"
+          style="width:100%;height:38px;padding:0 0.75rem;font-size:0.88rem;margin:0" />
+        <div id="tm-city-drop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #d1d0ce;border-radius:8px;z-index:20;box-shadow:0 4px 14px rgba(0,0,0,0.08),0 8px 24px rgba(0,0,0,0.05);max-height:220px;overflow-y:auto"></div>
+      </div>
+      <!-- Keyword -->
+      <div style="display:flex;gap:0.5rem;width:100%">
+        <input type="text" id="tm-keyword" placeholder="Artist, team or event name…" style="flex:1;height:38px;padding:0 0.75rem;font-size:0.88rem;margin:0" />
+        <button class="tm-search-btn" onclick="runTMSearch()">Search</button>
+      </div>
+    </div>
+    <div class="tm-results" id="tm-results">
+      <div class="tm-empty">Select a city and search to get started.</div>
+    </div>
+  </div>
+</div>
+
 <!-- FLIGHT SEARCH MODAL -->
 <div class="modal-overlay" id="flight-modal">
-  <div class="modal modal-wide">
+  <div class="modal modal-wide" style="max-width:1140px;width:95vw">
     <h2>Search Flights</h2>
 
-    <div class="flight-search-bar" id="flight-search-bar">
-      <div class="form-group">
-        <label>From</label>
-        <div class="airport-input-wrap">
-          <input type="text" id="fl-origin" placeholder="Search city or airport..." autocomplete="off" />
-          <button class="airport-clear" id="fl-origin-clear" onclick="clearAirport('fl-origin')" title="Clear">✕</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>To</label>
-        <div class="airport-input-wrap">
-          <input type="text" id="fl-dest" placeholder="Search city or airport..." autocomplete="off" />
-          <button class="airport-clear" id="fl-dest-clear" onclick="clearAirport('fl-dest')" title="Clear">✕</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="fl-date" />
-      </div>
-      <div class="form-group">
-        <label>Passengers</label>
-        <input type="number" id="fl-adults" value="1" min="1" max="9" style="width:70px" />
-      </div>
-      <button class="btn-primary" style="align-self:end;white-space:nowrap" onclick="searchFlights()">Search</button>
+    <div id="flight-legs-container"></div>
+    <div class="flight-legs-footer">
+      <button class="add-leg-btn" onclick="addFlightLeg()">+ Add flight</button>
+      <button class="btn-primary" style="margin-left:auto;white-space:nowrap" onclick="searchAllFlights()">Search</button>
     </div>
 
     <div id="flight-results"></div>
@@ -1650,11 +2066,15 @@
         </div>
         <div class="form-group" style="margin:0">
           <label>Check-in</label>
-          <input type="date" id="lodge-checkin" />
+          <div class="dp-wrap">
+            <input type="text" id="lodge-checkin" class="dp-input" placeholder="Pick date…" readonly />
+          </div>
         </div>
         <div class="form-group" style="margin:0">
           <label>Check-out</label>
-          <input type="date" id="lodge-checkout" />
+          <div class="dp-wrap">
+            <input type="text" id="lodge-checkout" class="dp-input" placeholder="Pick date…" readonly />
+          </div>
         </div>
         <div class="form-group" style="margin:0">
           <label>Guests</label>
@@ -1682,7 +2102,7 @@
       </div>
 
       <div id="lodging-results-wrap">
-        <div id="lodging-searching" style="display:none;text-align:center;padding:2rem;color:#555">
+        <div id="lodging-searching" style="display:none;text-align:center;padding:2rem;color:var(--text2)">
           <span class="spinner"></span> Searching lodging…
         </div>
         <div id="lodging-layout-area"></div>
@@ -1855,7 +2275,7 @@
             <div class="avatar" style="background:${m.color}">${m.name[0].toUpperCase()}</div>
             <span class="member-name">${esc(m.name)}</span>
           </div>
-          <span class="member-balance ${cls}">${prefix}$${Math.abs(net).toFixed(2)}</span>
+          <span class="member-balance ${cls}">${prefix}${fmt(Math.abs(net))}</span>
         </div>
       `;
     }).join('');
@@ -1874,11 +2294,53 @@
     return { owed, paid };
   }
 
+  function expenseCardHTML(exp) {
+    const totalPaid = exp.splits.reduce((s, sp) => s + (sp.paid ? sp.amount : 0), 0);
+    const pct = exp.total_amount > 0 ? Math.round((totalPaid / exp.total_amount) * 100) : 0;
+    const allPaid = pct === 100;
+    const nonePaid = pct === 0;
+    const tagClass = allPaid ? 'tag-paid' : nonePaid ? 'tag-unpaid' : 'tag-partial';
+    const tagText  = allPaid ? 'All Paid' : nonePaid ? 'Unpaid' : `${pct}% Paid`;
+    const paidByMember = tripData.members.find(m => m.id === exp.paid_by);
+    return `
+      <div class="expense-card">
+        <div class="expense-header">
+          <div>
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span class="expense-title">${esc(exp.name)}</span>
+              <span class="tag ${tagClass}">${tagText}</span>
+            </div>
+            <div class="expense-meta">
+              ${paidByMember ? `Paid by <strong>${esc(paidByMember.name)}</strong> · ` : ''}
+              ${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected
+              <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            </div>
+          </div>
+          <div class="expense-actions">
+            <span class="expense-amount">${fmt(exp.total_amount)}</span>
+            <button class="btn-danger btn-sm" onclick="deleteExpense('${exp.id}')">Delete</button>
+          </div>
+        </div>
+        <div class="splits-grid">
+          ${exp.splits.map(sp => `
+            <div class="split-chip ${sp.paid ? 'paid' : 'unpaid'}" onclick="toggleSplit('${sp.id}','${exp.id}')" title="Click to toggle payment">
+              <div class="avatar" style="background:${sp.member_color};width:24px;height:24px;font-size:0.7rem">${sp.member_name[0].toUpperCase()}</div>
+              <span class="split-name">${esc(sp.member_name)}</span>
+              <span class="split-amount">${fmt(sp.amount)}</span>
+              <span class="split-status ${sp.paid ? 'status-paid' : 'status-unpaid'}">${sp.paid ? '✓' : '✗'}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+  }
+
   function renderExpenses() {
-    const list = document.getElementById('expenses-list');
+    const flightsList  = document.getElementById('flights-list');
+    const expensesList = document.getElementById('expenses-list');
 
     if (tripData.expenses.length === 0) {
-      list.innerHTML = `
+      flightsList.innerHTML  = '';
+      expensesList.innerHTML = `
         <div class="empty-state">
           <h3>No expenses yet</h3>
           <p>Add your first expense — flights, hotel, food — and track who's paid.</p>
@@ -1886,59 +2348,84 @@
       return;
     }
 
-    list.innerHTML = tripData.expenses.map(exp => {
-      const totalPaid = exp.splits.reduce((s, sp) => s + (sp.paid ? sp.amount : 0), 0);
-      const pct = exp.total_amount > 0 ? Math.round((totalPaid / exp.total_amount) * 100) : 0;
-      const allPaid = pct === 100;
-      const nonePaid = pct === 0;
-      const tagClass = allPaid ? 'tag-paid' : nonePaid ? 'tag-unpaid' : 'tag-partial';
-      const tagText = allPaid ? 'All Paid' : nonePaid ? 'Unpaid' : `${pct}% Paid`;
+    const flights  = tripData.expenses.filter(e => /[A-Z]{3}\s*→\s*[A-Z]{3}/.test(e.name));
+    const expenses = tripData.expenses.filter(e => !/[A-Z]{3}\s*→\s*[A-Z]{3}/.test(e.name));
 
-      const paidByMember = tripData.members.find(m => m.id === exp.paid_by);
+    // ── Flights: static, no animation, always visible ──
+    flightsList.innerHTML = flights.length
+      ? `<div class="expense-section-label">${slIcon('plane', 12)} Flights</div>` + flights.map(expenseCardHTML).join('')
+      : '';
 
-      return `
-        <div class="expense-card">
-          <div class="expense-header">
-            <div>
-              <div style="display:flex;align-items:center;gap:0.5rem">
-                <span class="expense-title">${esc(exp.name)}</span>
-                <span class="tag ${tagClass}">${tagText}</span>
-              </div>
-              <div class="expense-meta">
-                ${paidByMember ? `Paid by <strong>${esc(paidByMember.name)}</strong> · ` : ''}
-                $${totalPaid.toFixed(2)} of $${exp.total_amount.toFixed(2)} collected
-                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-              </div>
-            </div>
-            <div class="expense-actions">
-              <span class="expense-amount">$${exp.total_amount.toFixed(2)}</span>
-              <button class="btn-danger btn-sm" onclick="deleteExpense('${exp.id}')">Delete</button>
-            </div>
-          </div>
-          <div class="splits-grid">
-            ${exp.splits.map(sp => `
-              <div class="split-chip ${sp.paid ? 'paid' : 'unpaid'}" onclick="toggleSplit('${sp.id}','${exp.id}')" title="Click to toggle payment">
-                <div class="avatar" style="background:${sp.member_color};width:24px;height:24px;font-size:0.7rem">${sp.member_name[0].toUpperCase()}</div>
-                <span class="split-name">${esc(sp.member_name)}</span>
-                <span class="split-amount">$${sp.amount.toFixed(2)}</span>
-                <span class="split-status ${sp.paid ? 'status-paid' : 'status-unpaid'}">${sp.paid ? '✓' : '✗'}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    }).join('');
+    // Make flight cards immediately visible (no animation)
+    flightsList.querySelectorAll('.expense-card').forEach(c => {
+      c.style.opacity = '1';
+      c.style.transform = 'none';
+    });
+
+    // ── Expenses: scrollable with animated list ──
+    if (!expenses.length) {
+      expensesList.innerHTML = '';
+      document.getElementById('expenses-list-wrap').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('expenses-list-wrap').style.display = 'block';
+    expensesList.innerHTML =
+      `<div class="expense-section-label" style="margin-top:0">${slIcon('briefcase', 12)} Expenses</div>` +
+      expenses.map(expenseCardHTML).join('');
+
+    // ── AnimatedList: IntersectionObserver with staggered delays ──
+    const cards = expensesList.querySelectorAll('.expense-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('al-visible');
+        } else {
+          entry.target.classList.remove('al-visible');
+        }
+      });
+    }, { threshold: 0.15, root: expensesList });
+
+    cards.forEach((card, i) => {
+      card.style.animationDelay = `${i * 0.08}s`;
+      observer.observe(card);
+    });
+
+    // ── Scroll gradients ──
+    const gradTop = document.getElementById('al-grad-top');
+    const gradBot = document.getElementById('al-grad-bottom');
+    function updateGrads() {
+      const { scrollTop, scrollHeight, clientHeight } = expensesList;
+      if (gradTop) gradTop.style.opacity = Math.min(scrollTop / 40, 1);
+      if (gradBot) gradBot.style.opacity = scrollHeight <= clientHeight ? 0 : Math.min((scrollHeight - scrollTop - clientHeight) / 40, 1);
+    }
+    expensesList.removeEventListener('scroll', expensesList._gradScroll);
+    expensesList._gradScroll = updateGrads;
+    expensesList.addEventListener('scroll', updateGrads);
+    updateGrads();
   }
 
   function renderSummary() {
     const total = tripData.expenses.reduce((s, e) => s + e.total_amount, 0);
-    const paid = tripData.expenses.reduce((s, e) =>
+    const paid  = tripData.expenses.reduce((s, e) =>
       s + e.splits.reduce((ss, sp) => ss + (sp.paid ? sp.amount : 0), 0), 0);
-    const owed = total - paid;
+    const owed  = total - paid;
 
-    document.getElementById('stat-total').textContent = '$' + total.toFixed(2);
-    document.getElementById('stat-paid').textContent = '$' + paid.toFixed(2);
-    document.getElementById('stat-owed').textContent = '$' + owed.toFixed(2);
+    document.getElementById('stat-total').textContent = fmt(total);
+
+    const subEl = document.getElementById('stat-owed-sub');
+    if (subEl) {
+      if (total === 0) {
+        subEl.textContent = '';
+        subEl.className = 'stat-owed-sub';
+      } else if (owed < 0.01) {
+        subEl.textContent = 'All settled ✓';
+        subEl.className = 'stat-owed-sub settled';
+      } else {
+        subEl.textContent = `${fmt(owed)} still owed`;
+        subEl.className = 'stat-owed-sub';
+      }
+    }
   }
 
   function renderBalances() {
@@ -1959,12 +2446,12 @@
               <div class="avatar" style="background:${m.color};width:24px;height:24px;font-size:0.7rem">${m.name[0].toUpperCase()}</div>
               <span style="font-size:0.9rem">${esc(m.name)}</span>
             </div>
-            <span style="font-size:0.8rem;color:var(--text2)">$${paid.toFixed(2)} / $${owed.toFixed(2)}</span>
+            <span style="font-size:0.8rem;color:var(--text2)">${fmt(paid)} / ${fmt(owed)}</span>
           </div>
           <div class="progress-bar">
             <div class="progress-fill" style="width:${pct}%;background:${remaining < 0.01 ? 'var(--green)' : 'var(--accent)'}"></div>
           </div>
-          ${remaining > 0.01 ? `<div style="font-size:0.75rem;color:var(--red);margin-top:0.2rem">Owes $${remaining.toFixed(2)} more</div>` : `<div style="font-size:0.75rem;color:var(--green);margin-top:0.2rem">All settled ✓</div>`}
+          ${remaining > 0.01 ? `<div style="font-size:0.75rem;color:var(--red);margin-top:0.2rem">Owes ${fmt(remaining)} more</div>` : `<div style="font-size:0.75rem;color:var(--green);margin-top:0.2rem">All settled ✓</div>`}
         </div>
       `;
     }).join('');
@@ -2096,8 +2583,83 @@
   }
 
   async function toggleSplit(splitId, expId) {
-    await fetch(`/api/splits/${splitId}/toggle`, { method: 'PATCH' });
-    await loadTrip(currentTripId);
+    const res  = await fetch(`/api/splits/${splitId}/toggle`, { method: 'PATCH' });
+    const data = await res.json();
+    const nowPaid = data.paid;
+
+    // Update local tripData in-place
+    for (const exp of tripData.expenses) {
+      if (exp.id === expId) {
+        for (const sp of exp.splits) {
+          if (sp.id === splitId) { sp.paid = nowPaid ? 1 : 0; break; }
+        }
+        break;
+      }
+    }
+
+    // Update just the chip in the DOM — no re-render, no animation replay
+    const chip = document.querySelector(`.split-chip[onclick*="${splitId}"]`);
+    if (chip) {
+      chip.classList.toggle('paid', nowPaid);
+      chip.classList.toggle('unpaid', !nowPaid);
+      const status = chip.querySelector('.split-status');
+      if (status) {
+        status.textContent   = nowPaid ? '✓' : '✗';
+        status.className     = `split-status ${nowPaid ? 'status-paid' : 'status-unpaid'}`;
+      }
+    }
+
+    // Update the tag + progress bar for that expense card only
+    const exp = tripData.expenses.find(e => e.id === expId);
+    if (exp) {
+      const totalPaid = exp.splits.reduce((s, sp) => s + (sp.paid ? sp.amount : 0), 0);
+      const pct       = exp.total_amount > 0 ? Math.round((totalPaid / exp.total_amount) * 100) : 0;
+      const allPaid   = pct === 100;
+      const nonePaid  = pct === 0;
+      const tagClass  = allPaid ? 'tag-paid' : nonePaid ? 'tag-unpaid' : 'tag-partial';
+      const tagText   = allPaid ? 'All Paid' : nonePaid ? 'Unpaid' : `${pct}% Paid`;
+
+      // Find the card that contains this split chip and update its tag + bar
+      const card = chip ? chip.closest('.expense-card') : null;
+      if (card) {
+        // Update tag
+        const tag = card.querySelector('.tag');
+        if (tag) { tag.className = `tag ${tagClass}`; tag.textContent = tagText; }
+
+        // Update progress fill width directly — keeps the existing element so CSS transition fires
+        const fill = card.querySelector('.progress-fill');
+        if (fill) {
+          fill.style.width = `${pct}%`;
+          fill.style.background = allPaid ? 'var(--green)' : 'var(--accent)';
+        }
+
+        // Update only the text node in expense-meta, leaving the progress bar untouched
+        const meta = card.querySelector('.expense-meta');
+        if (meta) {
+          const paidByMember = tripData.members.find(m => m.id === exp.paid_by);
+          const firstTextNode = meta.firstChild;
+          const textContent = `${paidByMember ? `Paid by ` : ''}${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected`;
+          // Replace only text, not the progress bar child
+          Array.from(meta.childNodes).forEach(n => {
+            if (n.nodeType === Node.TEXT_NODE || (n.nodeType === Node.ELEMENT_NODE && n.tagName === 'STRONG')) n.remove();
+          });
+          const textBefore = document.createTextNode('');
+          meta.insertBefore(textBefore, meta.firstChild);
+          if (paidByMember) {
+            const strong = document.createElement('strong');
+            strong.textContent = paidByMember.name;
+            meta.insertBefore(document.createTextNode('Paid by '), meta.firstChild);
+            meta.insertBefore(strong, meta.childNodes[1]);
+            meta.insertBefore(document.createTextNode(` · ${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected`), meta.childNodes[2]);
+          } else {
+            meta.insertBefore(document.createTextNode(`${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected`), meta.firstChild);
+          }
+        }
+      }
+    }
+
+    renderSummary();
+    renderBalances();
   }
 
   // ── SHARE ──
@@ -2109,6 +2671,11 @@
   // ── UTILS ──
   function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Format a number as a dollar amount with commas e.g. $1,234.56
+  function fmt(n, decimals = 2) {
+    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
   }
 
   let toastTimer;
@@ -2368,10 +2935,10 @@
         <div class="skeleton skel-line" style="width:100%;height:8px;margin-top:0.5rem"></div>
       </div>`).join('');
 
-    ['stat-total','stat-paid','stat-owed'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.innerHTML = '<span class="skeleton" style="display:inline-block;width:60px;height:18px;border-radius:6px"></span>'; }
-    });
+    const statTotalEl = document.getElementById('stat-total');
+    if (statTotalEl) statTotalEl.innerHTML = '<span class="skeleton" style="display:inline-block;width:120px;height:32px;border-radius:8px"></span>';
+    const statOwedSub = document.getElementById('stat-owed-sub');
+    if (statOwedSub) statOwedSub.textContent = '';
   }
 
   // ── ROUTING ──
@@ -2383,84 +2950,232 @@
 
   // ── FLIGHT SEARCH ──
 
+  // ── MULTI-LEG FLIGHT STATE ──
+  let flightLegsState = [{}];
+
+  function _showAirportChip(input, iata, city, country) {
+    const inputId = input.id;
+    input.style.display = 'none';
+    let chip = document.getElementById(inputId + '-chip');
+    if (!chip) {
+      chip = document.createElement('div');
+      chip.id = inputId + '-chip';
+      input.parentNode.appendChild(chip);
+    }
+    chip.className = 'airport-chip visible';
+    chip.innerHTML = `<strong class="chip-iata">${esc(iata)}</strong><span class="chip-loc">${esc(city)}, ${esc(country)}</span><button class="chip-clear" onclick="clearAirport('${inputId}')">✕</button>`;
+  }
+
+  function saveLegsState() {
+    flightLegsState = flightLegsState.map((s, i) => {
+      const oEl  = document.getElementById('fl-origin-' + i);
+      const dEl  = document.getElementById('fl-dest-' + i);
+      const dtEl = document.getElementById('fl-date-' + i);
+      return {
+        originIata:    oEl?.dataset.iata    || s.originIata    || '',
+        originCity:    oEl?.dataset.city    || s.originCity    || '',
+        originCountry: oEl?.dataset.country || s.originCountry || '',
+        destIata:      dEl?.dataset.iata    || s.destIata      || '',
+        destCity:      dEl?.dataset.city    || s.destCity      || '',
+        destCountry:   dEl?.dataset.country || s.destCountry   || '',
+        dateLabel:     dtEl?.value          || s.dateLabel     || '',
+        dateIso:       dtEl?.dataset.isoDate || s.dateIso      || '',
+      };
+    });
+  }
+
+  function renderFlightLegs() {
+    const container = document.getElementById('flight-legs-container');
+    const multi = flightLegsState.length > 1;
+    const memberCount = tripData?.members?.length || 1;
+
+    container.innerHTML = flightLegsState.map((_, i) => `
+      <div class="flight-leg-row" id="flight-leg-${i}">
+        <div class="leg-label">${multi ? `Flight\u00a0${i + 1}` : ''}</div>
+        <div class="form-group" style="margin:0">
+          <label>From</label>
+          <div class="airport-input-wrap">
+            <input type="text" id="fl-origin-${i}" placeholder="Search city or airport…" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>To</label>
+          <div class="airport-input-wrap">
+            <input type="text" id="fl-dest-${i}" placeholder="Search city or airport…" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Date</label>
+          <div class="dp-wrap">
+            <input type="text" id="fl-date-${i}" class="dp-input" placeholder="Pick date…" readonly />
+          </div>
+        </div>
+        ${i === 0 ? `
+          <div class="form-group" style="margin:0">
+            <label>Pax</label>
+            <input type="number" id="fl-adults" value="${Math.max(1, memberCount)}" min="1" max="9" style="margin:0;width:100%" />
+          </div>` : '<div></div>'}
+        ${multi ? `<button class="leg-remove-btn" onclick="removeFlightLeg(${i})" title="Remove leg">✕</button>` : '<div></div>'}
+      </div>
+    `).join('');
+
+    // Restore state + init autocomplete + date picker
+    flightLegsState.forEach((s, i) => {
+      setupAirportAutocomplete('fl-origin-' + i);
+      setupAirportAutocomplete('fl-dest-' + i);
+      initDatePicker('fl-date-' + i);
+
+      if (s.originIata) {
+        const el = document.getElementById('fl-origin-' + i);
+        if (el) {
+          el.dataset.iata = s.originIata; el.dataset.city = s.originCity; el.dataset.country = s.originCountry;
+          el.value = `${s.originIata}  ${s.originCity}, ${s.originCountry}`;
+          el.readOnly = true;
+          _showAirportChip(el, s.originIata, s.originCity, s.originCountry);
+        }
+      }
+      if (s.destIata) {
+        const el = document.getElementById('fl-dest-' + i);
+        if (el) {
+          el.dataset.iata = s.destIata; el.dataset.city = s.destCity; el.dataset.country = s.destCountry;
+          el.value = `${s.destIata}  ${s.destCity}, ${s.destCountry}`;
+          el.readOnly = true;
+          _showAirportChip(el, s.destIata, s.destCity, s.destCountry);
+        }
+      }
+      if (s.dateLabel) {
+        const el = document.getElementById('fl-date-' + i);
+        if (el) { el.value = s.dateLabel; el.dataset.isoDate = s.dateIso; }
+      }
+    });
+  }
+
+  function addFlightLeg() {
+    saveLegsState();
+    const last = flightLegsState[flightLegsState.length - 1];
+    flightLegsState.push({
+      originIata:    last.destIata    || '',
+      originCity:    last.destCity    || '',
+      originCountry: last.destCountry || '',
+      destIata: '', destCity: '', destCountry: '',
+      dateLabel: '', dateIso: '',
+    });
+    renderFlightLegs();
+    const newIdx = flightLegsState.length - 1;
+    const focusId = last.destIata ? 'fl-dest-' + newIdx : 'fl-origin-' + newIdx;
+    document.getElementById(focusId)?.focus();
+  }
+
+  function removeFlightLeg(i) {
+    if (flightLegsState.length <= 1) return;
+    saveLegsState();
+    flightLegsState.splice(i, 1);
+    renderFlightLegs();
+  }
+
   function openFlightSearch() {
     document.getElementById('flight-modal').classList.add('open');
     document.getElementById('flight-results').innerHTML = '';
+    flightLegsState = [{}];
+    renderFlightLegs();
+
+    // Default date = tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    document.getElementById('fl-date').value = tomorrow.toISOString().slice(0, 10);
+    const isoDate = tomorrow.toISOString().slice(0, 10);
+    const [y, m, d] = isoDate.split('-');
+    const label = new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const dtEl = document.getElementById('fl-date-0');
+    if (dtEl) { dtEl.value = label; dtEl.dataset.isoDate = isoDate; }
   }
 
   function closeFlightModal() {
     closeGlobalDrop();
+    _dpClose();
     document.getElementById('flight-modal').classList.remove('open');
   }
 
-  async function searchFlights() {
-    const origin  = document.getElementById('fl-origin').dataset.iata || '';
-    const dest    = document.getElementById('fl-dest').dataset.iata || '';
-    const date    = document.getElementById('fl-date').value;
-    const adults  = document.getElementById('fl-adults').value || 1;
-    if (!origin) { toast('Select a departure airport from the dropdown'); return; }
-    if (!dest)   { toast('Select a destination airport from the dropdown'); return; }
-    if (!date)   { toast('Pick a departure date'); return; }
+  function _flightResultHTML(f, isTop) {
+    const departTime = f.depart ? new Date(f.depart).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—';
+    const arriveTime = f.arrive ? new Date(f.arrive).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—';
+    const stopsLabel = f.stops === 0 ? 'Nonstop' : f.stops === 1 ? '1 stop' : `${f.stops} stops`;
+    const encoded = encodeURIComponent(JSON.stringify(f));
+    return `
+      <div class="flight-result${isTop ? ' flight-result-top' : ''}" onclick="showFlightDetail('${encoded}')" style="cursor:pointer">
+        <div class="flight-logo-wrap" style="flex-direction:column;align-items:flex-start;gap:0.3rem">
+          ${isTop ? '<span class="flight-top-badge">Suggested</span>' : ''}
+          <div style="display:flex;align-items:center;gap:0.6rem">
+            ${f.airline_logo ? `<img src="${esc(f.airline_logo)}" alt="${esc(f.airline)}" class="airline-logo" onerror="this.style.display='none'"/>` : ''}
+            <div class="flight-airline">
+              ${esc(f.airline)}
+              <div class="flight-airline-sub">${esc(f.flight_num)}</div>
+            </div>
+          </div>
+        </div>
+        <div class="flight-route">
+          <div style="text-align:center">
+            <div class="flight-iata">${esc(f.origin)}</div>
+            <div class="flight-times">${departTime}</div>
+          </div>
+          <div class="flight-arrow">
+            <span style="font-size:0.7rem">${esc(f.duration)}</span>
+            <span class="flight-arrow-line"></span>
+            <span style="font-size:0.7rem">${stopsLabel}</span>
+          </div>
+          <div style="text-align:center">
+            <div class="flight-iata">${esc(f.destination)}</div>
+            <div class="flight-times">${arriveTime}</div>
+          </div>
+        </div>
+        <div class="flight-price">
+          <div class="flight-price-main">${fmt(f.total_price)}</div>
+          <div class="flight-price-sub">${fmt(f.price_per_person)}/person × ${f.adults}</div>
+        </div>
+        <button class="flight-add-btn" onclick="event.stopPropagation();addFlightToTrip(${JSON.stringify(f).replace(/"/g,'&quot;')})">+</button>
+      </div>`;
+  }
+
+  async function searchAllFlights() {
+    const adults = parseInt(document.getElementById('fl-adults').value) || 1;
+
+    // Collect + validate all legs from live DOM
+    const legs = flightLegsState.map((_, i) => ({
+      origin: document.getElementById('fl-origin-' + i)?.dataset.iata || '',
+      dest:   document.getElementById('fl-dest-' + i)?.dataset.iata   || '',
+      date:   document.getElementById('fl-date-' + i)?.dataset.isoDate || '',
+    }));
+
+    for (let i = 0; i < legs.length; i++) {
+      const n = legs.length > 1 ? ` for flight ${i + 1}` : '';
+      if (!legs[i].origin) { toast(`Select a departure airport${n}`); return; }
+      if (!legs[i].dest)   { toast(`Select a destination${n}`);       return; }
+      if (!legs[i].date)   { toast(`Pick a departure date${n}`);      return; }
+    }
 
     const resultsEl = document.getElementById('flight-results');
     resultsEl.innerHTML = '<div class="flight-searching"><span class="spinner"></span> Searching flights…</div>';
 
-    const res = await fetch(`/api/flights/search?origin=${origin}&destination=${dest}&date=${date}&adults=${adults}`);
-    const data = await res.json();
+    const fetches = legs.map((leg, i) =>
+      fetch(`/api/flights/search?origin=${leg.origin}&destination=${leg.dest}&date=${leg.date}&adults=${adults}`)
+        .then(r => r.json())
+        .then(data => ({ i, leg, data, timedOut: false }))
+        .catch(() => ({ i, leg, data: null, timedOut: true }))
+    );
 
-    if (data.error) {
-      resultsEl.innerHTML = `<div class="flight-searching" style="color:var(--red)">${esc(data.error)}</div>`;
-      return;
-    }
+    const results = await Promise.all(fetches);
+    const multi = legs.length > 1;
 
-    if (!data.flights || data.flights.length === 0) {
-      resultsEl.innerHTML = '<div class="flight-searching">No flights found for this route and date.</div>';
-      return;
-    }
-
-    resultsEl.innerHTML = data.flights.map((f, idx) => {
-      const isTop = idx === 0;
-      const departTime = f.depart ? new Date(f.depart).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—';
-      const arriveTime = f.arrive ? new Date(f.arrive).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—';
-      const stopsLabel = f.stops === 0 ? 'Nonstop' : f.stops === 1 ? '1 stop' : `${f.stops} stops`;
-      const encoded = encodeURIComponent(JSON.stringify(f));
-      return `
-        <div class="flight-result${isTop ? ' flight-result-top' : ''}" onclick="showFlightDetail('${encoded}')" style="cursor:pointer">
-          <div class="flight-logo-wrap" style="flex-direction:column;align-items:flex-start;gap:0.3rem">
-            ${isTop ? '<span class="flight-top-badge">Suggested</span>' : ''}
-            <div style="display:flex;align-items:center;gap:0.6rem">
-              ${f.airline_logo ? `<img src="${esc(f.airline_logo)}" alt="${esc(f.airline)}" class="airline-logo" onerror="this.style.display='none'"/>` : ''}
-              <div class="flight-airline">
-                ${esc(f.airline)}
-                <div class="flight-airline-sub">${esc(f.flight_num)}</div>
-              </div>
-            </div>
-          </div>
-          <div class="flight-route">
-            <div style="text-align:center">
-              <div class="flight-iata">${esc(f.origin)}</div>
-              <div class="flight-times">${departTime}</div>
-            </div>
-            <div class="flight-arrow">
-              <span style="font-size:0.7rem">${esc(f.duration)}</span>
-              <span>————</span>
-              <span style="font-size:0.7rem">${stopsLabel}</span>
-            </div>
-            <div style="text-align:center">
-              <div class="flight-iata">${esc(f.destination)}</div>
-              <div class="flight-times">${arriveTime}</div>
-            </div>
-          </div>
-          <div class="flight-price">
-            <div class="flight-price-main">$${f.total_price.toFixed(2)}</div>
-            <div class="flight-price-sub">$${f.price_per_person.toFixed(2)}/person × ${f.adults}</div>
-          </div>
-          <button class="flight-add-btn" onclick="event.stopPropagation();addFlightToTrip(${JSON.stringify(f).replace(/"/g,'&quot;')})">+</button>
-        </div>
-      `;
+    resultsEl.innerHTML = results.map(({ i, leg, data, timedOut }) => {
+      const header = multi
+        ? `<div class="flight-leg-results-header">Flight ${i + 1} · ${leg.origin} → ${leg.dest}</div>`
+        : '';
+      if (timedOut || (data?.error && /timed out|timeout/i.test(data.error)))
+        return header + `<div class="flight-searching" style="color:#000;font-weight:700">The search timed out. Please try again.</div>`;
+      if (data?.error)
+        return header + `<div class="flight-searching" style="color:#000;font-weight:700">${esc(data.error)}</div>`;
+      if (!data?.flights?.length)
+        return header + `<div class="flight-searching">No flights found for this route and date.</div>`;
+      return header + data.flights.map((f, idx) => _flightResultHTML(f, idx === 0)).join('');
     }).join('');
   }
 
@@ -2698,8 +3413,23 @@
     } catch(_) { return false; }
   }
 
+  function _setLodgeDate(id, dateObj) {
+    const iso = dateObj.toISOString().slice(0, 10);
+    const [y, m, d] = iso.split('-');
+    const label = new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = label;
+    el.dataset.isoDate = iso;
+  }
+
   function openLodging() {
     document.getElementById('lodging-modal').classList.add('open');
+
+    // Init custom date pickers (clone to reset listeners each open)
+    initDatePicker('lodge-checkin');
+    initDatePicker('lodge-checkout');
+
     const noFlight = document.getElementById('lodging-no-flight');
     const section  = document.getElementById('lodging-search-section');
 
@@ -2725,10 +3455,9 @@
       const dateMatch = flightExp.name.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
       if (dateMatch) {
         const d    = new Date(dateMatch[1]);
-        const fmt  = x => x.toISOString().slice(0, 10);
         const cout = new Date(d); cout.setDate(cout.getDate() + 7);
-        document.getElementById('lodge-checkin').value  = fmt(d);
-        document.getElementById('lodge-checkout').value = fmt(cout);
+        _setLodgeDate('lodge-checkin',  d);
+        _setLodgeDate('lodge-checkout', cout);
       }
     }
     if (tripData.members.length > 0)
@@ -2743,8 +3472,8 @@
 
   async function searchLodging() {
     const dest     = document.getElementById('lodge-dest').value.trim();
-    const checkin  = document.getElementById('lodge-checkin').value;
-    const checkout = document.getElementById('lodge-checkout').value;
+    const checkin  = document.getElementById('lodge-checkin').dataset.isoDate  || '';
+    const checkout = document.getElementById('lodge-checkout').dataset.isoDate || '';
     const adults   = document.getElementById('lodge-adults').value || 2;
     if (!dest)     { toast('Enter a destination'); return; }
     if (!checkin)  { toast('Pick a check-in date'); return; }
@@ -2758,18 +3487,28 @@
 
     const qs = new URLSearchParams({ destination: dest, check_in: checkin, check_out: checkout, adults });
     const [res, mapsOk] = await Promise.all([
-      fetch('/api/lodging/search?' + qs),
+      fetch('/api/booking/search?' + qs),
       loadGoogleMaps()
     ]);
     const data = await res.json();
     document.getElementById('lodging-searching').style.display = 'none';
 
     if (data.error) {
-      area.innerHTML = `<div style="padding:2rem;text-align:center;color:#c00">${esc(data.error)}</div>`;
+      if (data.error === 'rate_limit') {
+        area.innerHTML = `
+          <div style="padding:2.5rem;text-align:center;max-width:420px;margin:0 auto">
+            <div style="font-size:2rem;margin-bottom:0.75rem">⏳</div>
+            <div style="font-size:1rem;font-weight:600;margin-bottom:0.4rem">Rate limit reached</div>
+            <div style="font-size:0.875rem;color:var(--text2);line-height:1.5">${esc(data.message || 'The Booking.com API rate limit was hit. Please wait a moment and try again.')}</div>
+            <button onclick="findLodging()" style="margin-top:1.25rem;padding:0.55rem 1.4rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:0.9rem;cursor:pointer;font-family:inherit">Try again</button>
+          </div>`;
+      } else {
+        area.innerHTML = `<div style="padding:2rem;text-align:center;color:#c00">${esc(data.error)}</div>`;
+      }
       return;
     }
     if (!data.lodging || !data.lodging.length) {
-      area.innerHTML = `<div style="padding:2rem;text-align:center;color:#555">No lodging found. Try different dates or destination.</div>`;
+      area.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--text2)">No lodging found. Try different dates or destination.</div>`;
       return;
     }
 
@@ -2795,7 +3534,7 @@
         return p >= histSelLo && p <= histSelHi;
       });
     if (!filtered.length) {
-      list.innerHTML = `<div style="padding:2rem;text-align:center;color:#555">No hotels in this price range.</div>`;
+      list.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--text2)">No hotels in this price range.</div>`;
       return;
     }
     list.innerHTML = filtered.map(({ h, origIdx }, i) => `
@@ -2805,11 +3544,13 @@
         <div class="lodging-info">
           <div class="lodging-name">${esc(h.name)}</div>
           <div class="lodging-meta">
-            ${h.rating ? `★ ${h.rating}${h.reviews ? ` · ${h.reviews.toLocaleString()} reviews` : ''}` : ''}
-            ${h.hotel_class ? ` · ${esc(h.hotel_class)}` : ''}
+            ${h.rating ? `★ ${h.rating} <span style="font-weight:400">${h.rating_word || ''}${h.reviews ? ` · ${h.reviews.toLocaleString()} reviews` : ''}</span>` : ''}
+            ${h.stars ? ` · ${'★'.repeat(h.stars)}` : ''}
           </div>
           <div class="lodging-amenities">
-            ${(h.amenities||[]).slice(0,3).map(a=>`<span class="lodging-amenity">${esc(a)}</span>`).join('')}
+            ${h.is_free_cancellable ? `<span class="lodging-amenity" style="color:#16a34a;border-color:#16a34a">Free cancel</span>` : ''}
+            ${h.breakfast_included ? `<span class="lodging-amenity">Breakfast incl.</span>` : ''}
+            ${h.city ? `<span class="lodging-amenity">${esc(h.city)}</span>` : ''}
           </div>
         </div>
         <div class="lodging-price">
@@ -2825,7 +3566,7 @@
     if (!mapEl) return;
 
     if (!mapsOk || !window.google) {
-      mapEl.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.5rem;padding:1.5rem;text-align:center"><div style="font-size:1.5rem">🗺️</div><div style="font-weight:700;color:#111;font-size:0.9rem">Google Maps not connected</div><div style="color:#555;font-size:0.82rem">Open <code style="background:#f0efec;padding:0.1rem 0.35rem;border-radius:4px">config.py</code>, paste your key into <code style="background:#f0efec;padding:0.1rem 0.35rem;border-radius:4px">GOOGLE_MAPS_KEY</code>, then restart the server.</div></div>`;
+      mapEl.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.5rem;padding:1.5rem;text-align:center;background:var(--surface)"><div style="font-size:1.5rem">🗺️</div><div style="font-weight:700;color:var(--text);font-size:0.9rem">Google Maps not connected</div><div style="color:var(--text2);font-size:0.82rem">Open <code style="background:var(--surface2);padding:0.1rem 0.35rem;border-radius:4px">config.py</code>, paste your key into <code style="background:var(--surface2);padding:0.1rem 0.35rem;border-radius:4px">GOOGLE_MAPS_KEY</code>, then restart the server.</div></div>`;
       return;
     }
 
@@ -2855,12 +3596,12 @@
       const marker = new google.maps.Marker({
         position: { lat: h.lat, lng: h.lng },
         map: lodgingMap,
-        icon: pinSvg(i === 0 ? '#16a34a' : '#f97316'),
+        icon: pinSvg(i === 0 ? '#22c55e' : '#36A6FF'),
         title: h.name,
         zIndex: i === 0 ? 10 : 1,
       });
       marker.addListener('click', () => {
-        infoWindow.setContent(`<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:700;font-size:0.85rem">${h.name}</div><div style="font-size:0.78rem;color:#555">${h.price_per_night_str || ''}/night</div>`);
+        infoWindow.setContent(`<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:700;font-size:0.85rem;color:#1a1a1a">${h.name}</div><div style="font-size:0.78rem;color:#666">${h.price_per_night_str || ''}/night</div>`);
         infoWindow.open(lodgingMap, marker);
         highlightLodgingCard(i);
       });
@@ -2896,14 +3637,14 @@
     list.innerHTML = `
       <div class="lodging-detail">
         <div>
-          <button class="lodge-back-btn" onclick="renderLodgingCards();buildGoogleMap(document.getElementById('lodge-dest').value, !!(window.google))">← Back to results</button>
+          <button class="lodge-back-btn" onclick="renderLodgingCards();buildGoogleMap(document.getElementById('lodge-dest').value, !!(window.google))">Back to results</button>
         </div>
         ${imgs.length ? `
           <div class="lodge-slideshow" id="lodge-ss">
             ${imgs.map((src,j)=>`<img class="lodge-slide${j===0?' active':''}" src="${esc(src)}" onerror="this.style.display='none'">`).join('')}
             ${imgs.length>1?`
-              <button class="lodge-slide-btn prev" onclick="slideShow(-1)">‹</button>
-              <button class="lodge-slide-btn next" onclick="slideShow(1)">›</button>
+              <button class="lodge-slide-btn prev" onclick="slideShow(-1)">prev</button>
+              <button class="lodge-slide-btn next" onclick="slideShow(1)">next</button>
               <div class="lodge-slide-dots" id="lodge-dots">
                 ${imgs.map((_,j)=>`<div class="lodge-dot${j===0?' active':''}" id="ldot-${j}"></div>`).join('')}
               </div>` : ''}
@@ -2911,9 +3652,9 @@
         <div class="lodge-detail-header">
           <div>
             <div class="lodge-detail-name">${esc(h.name)}</div>
-            ${h.hotel_class ? `<div style="font-size:0.78rem;color:#666;margin-top:0.1rem">${esc(h.hotel_class)}</div>` : ''}
+            ${h.hotel_class ? `<div style="font-size:0.78rem;color:var(--text2);margin-top:0.1rem">${esc(h.hotel_class)}</div>` : ''}
             <div class="lodge-detail-stars" style="margin-top:0.25rem">
-              ${stars}${h.rating ? ` <span style="color:#333;font-size:0.8rem">${h.rating}${h.reviews ? ` · ${h.reviews.toLocaleString()} reviews` : ''}</span>` : ''}
+              ${stars}${h.rating ? ` <span style="color:var(--text2);font-size:0.8rem">${h.rating}${h.reviews ? ` · ${h.reviews.toLocaleString()} reviews` : ''}</span>` : ''}
             </div>
           </div>
           <div style="text-align:right">
@@ -2926,7 +3667,7 @@
         ${h.description ? `<div class="lodge-detail-desc">${esc(h.description)}</div>` : ''}
         ${(h.amenities && h.amenities.length) ? `
           <div>
-            <div style="font-size:0.78rem;font-weight:700;color:#333;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em">Amenities</div>
+            <div style="font-size:0.78rem;font-weight:700;color:var(--text2);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em">Amenities</div>
             <div>
               ${h.amenities.map(a => `
                 <div class="lodge-amenity-row">
@@ -2952,8 +3693,8 @@
 
   async function addLodgingToTrip(i) {
     const h = lodgingData[i];
-    const cin  = document.getElementById('lodge-checkin').value;
-    const cout = document.getElementById('lodge-checkout').value;
+    const cin  = document.getElementById('lodge-checkin').dataset.isoDate  || '';
+    const cout = document.getElementById('lodge-checkout').dataset.isoDate || '';
     const nights = (cin && cout) ? Math.max(1, Math.round((new Date(cout) - new Date(cin)) / 86400000)) : 1;
     const total  = h.total_price || (h.price_per_night * nights) || 0;
     const members = tripData.members;
@@ -3255,26 +3996,33 @@
   function selectAirport(a) {
     if (!activeInput) return;
     const input = activeInput;
-    const inputId = input.id;
 
-    // Show as readonly: bold IATA (location)
-    input.value    = `${a.iata}  (${a.city}, ${a.country})`;
-    input.dataset.iata = a.iata;
+    // Store full airport data on the element
+    input.dataset.iata    = a.iata;
+    input.dataset.city    = a.city;
+    input.dataset.country = a.country;
+    input.value    = `${a.iata}  ${a.city}, ${a.country}`;
     input.readOnly = true;
 
-    const clearBtn = document.getElementById(inputId + '-clear');
-    if (clearBtn) clearBtn.classList.add('visible');
+    // Replace input with styled chip
+    _showAirportChip(input, a.iata, a.city, a.country);
 
     closeGlobalDrop();
   }
 
   function clearAirport(inputId) {
     const input = document.getElementById(inputId);
+    if (!input) return;
     input.value    = '';
     input.readOnly = false;
+    input.style.display = '';
     delete input.dataset.iata;
-    const clearBtn = document.getElementById(inputId + '-clear');
-    if (clearBtn) clearBtn.classList.remove('visible');
+    delete input.dataset.city;
+    delete input.dataset.country;
+
+    const chip = document.getElementById(inputId + '-chip');
+    if (chip) { chip.className = 'airport-chip'; chip.innerHTML = ''; }
+
     input.focus();
   }
 
@@ -3331,8 +4079,107 @@
     });
   }
 
-  setupAirportAutocomplete('fl-origin');
-  setupAirportAutocomplete('fl-dest');
+  // ── CUSTOM DATE PICKER ──
+  (function() {
+    const popup = document.createElement('div');
+    popup.className = 'dp-popup';
+    popup.id = 'dp-popup-global';
+    document.body.appendChild(popup);
+
+    let dpActiveInput = null;
+    let dpYear = new Date().getFullYear();
+    let dpMonth = new Date().getMonth();
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DAY_NAMES = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    function renderCal() {
+      const today = new Date();
+      const todayIso = today.toISOString().slice(0, 10);
+      const selectedIso = dpActiveInput?.dataset.isoDate || '';
+      const firstDay = new Date(dpYear, dpMonth, 1).getDay();
+      const daysInMonth = new Date(dpYear, dpMonth + 1, 0).getDate();
+
+      const dayNamesHTML = DAY_NAMES.map(n => `<div class="dp-day-name">${n}</div>`).join('');
+      let cellsHTML = '';
+      for (let k = 0; k < firstDay; k++) cellsHTML += `<div class="dp-day dp-blank"></div>`;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const iso = `${dpYear}-${String(dpMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isPast     = iso < todayIso;
+        const isToday    = iso === todayIso;
+        const isSelected = iso === selectedIso;
+        let cls = 'dp-day';
+        if (isSelected) cls += ' dp-selected';
+        else if (isToday) cls += ' dp-today';
+        if (isPast) cls += ' dp-disabled';
+        cellsHTML += `<div class="${cls}" data-iso="${iso}">${d}</div>`;
+      }
+
+      popup.innerHTML = `
+        <div class="dp-header">
+          <button class="dp-nav" id="dp-prev">‹</button>
+          <span class="dp-month-label">${MONTHS[dpMonth]} ${dpYear}</span>
+          <button class="dp-nav" id="dp-next">›</button>
+        </div>
+        <div class="dp-grid">${dayNamesHTML}${cellsHTML}</div>`;
+
+      popup.querySelector('#dp-prev').addEventListener('click', e => {
+        e.stopPropagation();
+        dpMonth--; if (dpMonth < 0) { dpMonth = 11; dpYear--; } renderCal();
+      });
+      popup.querySelector('#dp-next').addEventListener('click', e => {
+        e.stopPropagation();
+        dpMonth++; if (dpMonth > 11) { dpMonth = 0; dpYear++; } renderCal();
+      });
+      popup.querySelectorAll('.dp-day[data-iso]').forEach(el => {
+        if (el.classList.contains('dp-disabled')) return;
+        el.addEventListener('click', e => {
+          e.stopPropagation();
+          const iso = el.dataset.iso;
+          const [y, m, dv] = iso.split('-');
+          const label = new Date(+y, +m - 1, +dv).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+          dpActiveInput.value = label;
+          dpActiveInput.dataset.isoDate = iso;
+          _dpClose();
+        });
+      });
+    }
+
+    function openDP(input) {
+      dpActiveInput = input;
+      const iso = input.dataset.isoDate;
+      if (iso) { const [y, m] = iso.split('-'); dpYear = +y; dpMonth = +m - 1; }
+      else { const n = new Date(); dpYear = n.getFullYear(); dpMonth = n.getMonth(); }
+      const rect = input.getBoundingClientRect();
+      popup.style.top  = (rect.bottom + 4) + 'px';
+      popup.style.left = rect.left + 'px';
+      renderCal();
+      popup.classList.add('open');
+    }
+
+    window._dpClose = function() {
+      popup.classList.remove('open');
+      dpActiveInput = null;
+    };
+
+    window.initDatePicker = function(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      // Remove old listener by cloning
+      const fresh = input.cloneNode(true);
+      input.parentNode.replaceChild(fresh, input);
+      fresh.addEventListener('click', e => {
+        e.stopPropagation();
+        if (dpActiveInput === fresh) { _dpClose(); return; }
+        openDP(fresh);
+      });
+    };
+
+    popup.addEventListener('mousedown', e => e.preventDefault());
+    document.addEventListener('click', e => {
+      if (dpActiveInput && !popup.contains(e.target) && e.target !== dpActiveInput) _dpClose();
+    });
+  })();
 
   // ── FLIGHT DETAIL POPUP ──
   let _detailFlight = null;
@@ -3383,7 +4230,7 @@
 
       <div class="flight-detail-row">
         <span class="flight-detail-label">Route</span>
-        <span class="flight-detail-val">${esc(f.origin)} → ${esc(f.destination)}</span>
+        <span class="flight-detail-val">${esc(f.origin)} to ${esc(f.destination)}</span>
       </div>
       <div class="flight-detail-row">
         <span class="flight-detail-label">Departure</span>
@@ -3403,7 +4250,7 @@
       </div>
       <div class="flight-detail-row">
         <span class="flight-detail-label">Price</span>
-        <span class="flight-detail-val" style="color:var(--accent)">$${f.total_price.toFixed(2)} total · $${f.price_per_person.toFixed(2)}/person</span>
+        <span class="flight-detail-val" style="color:var(--accent)">${fmt(f.total_price)} total · ${fmt(f.price_per_person)}/person</span>
       </div>
       ${f.carbon_kg ? `<div class="flight-detail-row"><span class="flight-detail-label">CO₂ estimate</span><span class="flight-detail-val">${f.carbon_kg} kg</span></div>` : ''}
 
@@ -3420,6 +4267,205 @@
 
   document.getElementById('flight-detail-modal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('open');
+  });
+
+  // ── SERVICE DROPDOWN ──
+
+  function toggleServiceDrop(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('service-drop');
+    drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+  }
+
+  document.addEventListener('click', function(e) {
+    const drop = document.getElementById('service-drop');
+    if (drop && !drop.contains(e.target)) drop.style.display = 'none';
+  });
+
+  // ── TICKETMASTER ──
+
+  let _tmSelectedCity = '';  // city name sent to API
+
+  // ── WORLD CITIES for TM search ──
+  const WORLD_CITIES = [
+    // North America
+    {iata:'NYC',city:'New York',country:'United States'},{iata:'LAX',city:'Los Angeles',country:'United States'},{iata:'CHI',city:'Chicago',country:'United States'},{iata:'HOU',city:'Houston',country:'United States'},{iata:'PHX',city:'Phoenix',country:'United States'},{iata:'PHL',city:'Philadelphia',country:'United States'},{iata:'SAN',city:'San Antonio',country:'United States'},{iata:'SD',city:'San Diego',country:'United States'},{iata:'DFW',city:'Dallas',country:'United States'},{iata:'SJC',city:'San Jose',country:'United States'},{iata:'ATX',city:'Austin',country:'United States'},{iata:'JAX',city:'Jacksonville',country:'United States'},{iata:'FTW',city:'Fort Worth',country:'United States'},{iata:'CLB',city:'Columbus',country:'United States'},{iata:'IND',city:'Indianapolis',country:'United States'},{iata:'SFO',city:'San Francisco',country:'United States'},{iata:'SEA',city:'Seattle',country:'United States'},{iata:'DEN',city:'Denver',country:'United States'},{iata:'NAS',city:'Nashville',country:'United States'},{iata:'OKC',city:'Oklahoma City',country:'United States'},{iata:'ELP',city:'El Paso',country:'United States'},{iata:'WAS',city:'Washington DC',country:'United States'},{iata:'BOS',city:'Boston',country:'United States'},{iata:'LVS',city:'Las Vegas',country:'United States'},{iata:'MEM',city:'Memphis',country:'United States'},{iata:'LOU',city:'Louisville',country:'United States'},{iata:'BAL',city:'Baltimore',country:'United States'},{iata:'MIL',city:'Milwaukee',country:'United States'},{iata:'ABQ',city:'Albuquerque',country:'United States'},{iata:'TUC',city:'Tucson',country:'United States'},{iata:'FRS',city:'Fresno',country:'United States'},{iata:'SAC',city:'Sacramento',country:'United States'},{iata:'MES',city:'Mesa',country:'United States'},{iata:'ATL',city:'Atlanta',country:'United States'},{iata:'MIA',city:'Miami',country:'United States'},{iata:'ORL',city:'Orlando',country:'United States'},{iata:'TPA',city:'Tampa',country:'United States'},{iata:'NOL',city:'New Orleans',country:'United States'},{iata:'PIT',city:'Pittsburgh',country:'United States'},{iata:'CLE',city:'Cleveland',country:'United States'},{iata:'MIN',city:'Minneapolis',country:'United States'},{iata:'KCS',city:'Kansas City',country:'United States'},{iata:'STL',city:'St. Louis',country:'United States'},{iata:'SLC',city:'Salt Lake City',country:'United States'},{iata:'POR',city:'Portland',country:'United States'},{iata:'ANC',city:'Anchorage',country:'United States'},{iata:'HNL',city:'Honolulu',country:'United States'},{iata:'DET',city:'Detroit',country:'United States'},{iata:'RDU',city:'Raleigh',country:'United States'},{iata:'CHA',city:'Charlotte',country:'United States'},
+    // Canada
+    {iata:'YYZ',city:'Toronto',country:'Canada'},{iata:'YVR',city:'Vancouver',country:'Canada'},{iata:'YUL',city:'Montreal',country:'Canada'},{iata:'YYC',city:'Calgary',country:'Canada'},{iata:'YEG',city:'Edmonton',country:'Canada'},{iata:'YOW',city:'Ottawa',country:'Canada'},{iata:'YWG',city:'Winnipeg',country:'Canada'},{iata:'YQB',city:'Quebec City',country:'Canada'},{iata:'YHZ',city:'Halifax',country:'Canada'},
+    // Mexico & Latin America
+    {iata:'MEX',city:'Mexico City',country:'Mexico'},{iata:'GDL',city:'Guadalajara',country:'Mexico'},{iata:'MTY',city:'Monterrey',country:'Mexico'},{iata:'CUN',city:'Cancun',country:'Mexico'},{iata:'BOG',city:'Bogota',country:'Colombia'},{iata:'MDE',city:'Medellin',country:'Colombia'},{iata:'GRU',city:'São Paulo',country:'Brazil'},{iata:'GIG',city:'Rio de Janeiro',country:'Brazil'},{iata:'BSB',city:'Brasilia',country:'Brazil'},{iata:'SSA',city:'Salvador',country:'Brazil'},{iata:'EZE',city:'Buenos Aires',country:'Argentina'},{iata:'SCL',city:'Santiago',country:'Chile'},{iata:'LIM',city:'Lima',country:'Peru'},{iata:'UIO',city:'Quito',country:'Ecuador'},{iata:'MVD',city:'Montevideo',country:'Uruguay'},{iata:'ASU',city:'Asuncion',country:'Paraguay'},{iata:'CCS',city:'Caracas',country:'Venezuela'},{iata:'HAV',city:'Havana',country:'Cuba'},{iata:'SJO',city:'San Jose',country:'Costa Rica'},{iata:'PTY',city:'Panama City',country:'Panama'},{iata:'SAL',city:'San Salvador',country:'El Salvador'},
+    // UK & Ireland
+    {iata:'LHR',city:'London',country:'United Kingdom'},{iata:'MAN',city:'Manchester',country:'United Kingdom'},{iata:'BHX',city:'Birmingham',country:'United Kingdom'},{iata:'GLA',city:'Glasgow',country:'United Kingdom'},{iata:'EDI',city:'Edinburgh',country:'United Kingdom'},{iata:'LBA',city:'Leeds',country:'United Kingdom'},{iata:'BRS',city:'Bristol',country:'United Kingdom'},{iata:'LPL',city:'Liverpool',country:'United Kingdom'},{iata:'NCL',city:'Newcastle',country:'United Kingdom'},{iata:'DUB',city:'Dublin',country:'Ireland'},{iata:'ORK',city:'Cork',country:'Ireland'},
+    // Western Europe
+    {iata:'CDG',city:'Paris',country:'France'},{iata:'MRS',city:'Marseille',country:'France'},{iata:'LYS',city:'Lyon',country:'France'},{iata:'NCE',city:'Nice',country:'France'},{iata:'FRA',city:'Frankfurt',country:'Germany'},{iata:'MUC',city:'Munich',country:'Germany'},{iata:'TXL',city:'Berlin',country:'Germany'},{iata:'HAM',city:'Hamburg',country:'Germany'},{iata:'CGN',city:'Cologne',country:'Germany'},{iata:'STR',city:'Stuttgart',country:'Germany'},{iata:'DUS',city:'Düsseldorf',country:'Germany'},{iata:'AMS',city:'Amsterdam',country:'Netherlands'},{iata:'RTM',city:'Rotterdam',country:'Netherlands'},{iata:'BRU',city:'Brussels',country:'Belgium'},{iata:'ANR',city:'Antwerp',country:'Belgium'},{iata:'MAD',city:'Madrid',country:'Spain'},{iata:'BCN',city:'Barcelona',country:'Spain'},{iata:'VLC',city:'Valencia',country:'Spain'},{iata:'SVQ',city:'Seville',country:'Spain'},{iata:'FCO',city:'Rome',country:'Italy'},{iata:'MXP',city:'Milan',country:'Italy'},{iata:'NAP',city:'Naples',country:'Italy'},{iata:'TRN',city:'Turin',country:'Italy'},{iata:'ZRH',city:'Zurich',country:'Switzerland'},{iata:'GVA',city:'Geneva',country:'Switzerland'},{iata:'BSL',city:'Basel',country:'Switzerland'},{iata:'VIE',city:'Vienna',country:'Austria'},{iata:'LIS',city:'Lisbon',country:'Portugal'},{iata:'OPO',city:'Porto',country:'Portugal'},{iata:'CPH',city:'Copenhagen',country:'Denmark'},{iata:'OSL',city:'Oslo',country:'Norway'},{iata:'BGO',city:'Bergen',country:'Norway'},{iata:'ARN',city:'Stockholm',country:'Sweden'},{iata:'GOT',city:'Gothenburg',country:'Sweden'},{iata:'HEL',city:'Helsinki',country:'Finland'},{iata:'RKV',city:'Reykjavik',country:'Iceland'},
+    // Central & Eastern Europe
+    {iata:'WAW',city:'Warsaw',country:'Poland'},{iata:'KRK',city:'Krakow',country:'Poland'},{iata:'PRG',city:'Prague',country:'Czech Republic'},{iata:'BUD',city:'Budapest',country:'Hungary'},{iata:'BUH',city:'Bucharest',country:'Romania'},{iata:'SOF',city:'Sofia',country:'Bulgaria'},{iata:'ATH',city:'Athens',country:'Greece'},{iata:'SKG',city:'Thessaloniki',country:'Greece'},{iata:'IST',city:'Istanbul',country:'Turkey'},{iata:'ANK',city:'Ankara',country:'Turkey'},{iata:'IZM',city:'Izmir',country:'Turkey'},{iata:'OTP',city:'Bucharest',country:'Romania'},{iata:'ZAG',city:'Zagreb',country:'Croatia'},{iata:'LJU',city:'Ljubljana',country:'Slovenia'},{iata:'BEG',city:'Belgrade',country:'Serbia'},{iata:'SJJ',city:'Sarajevo',country:'Bosnia'},{iata:'SKP',city:'Skopje',country:'North Macedonia'},{iata:'TIA',city:'Tirana',country:'Albania'},{iata:'RIX',city:'Riga',country:'Latvia'},{iata:'TLL',city:'Tallinn',country:'Estonia'},{iata:'VNO',city:'Vilnius',country:'Lithuania'},{iata:'KBP',city:'Kyiv',country:'Ukraine'},{iata:'SVO',city:'Moscow',country:'Russia'},{iata:'LED',city:'St. Petersburg',country:'Russia'},
+    // Middle East
+    {iata:'DXB',city:'Dubai',country:'UAE'},{iata:'AUH',city:'Abu Dhabi',country:'UAE'},{iata:'DOH',city:'Doha',country:'Qatar'},{iata:'RUH',city:'Riyadh',country:'Saudi Arabia'},{iata:'JED',city:'Jeddah',country:'Saudi Arabia'},{iata:'KWI',city:'Kuwait City',country:'Kuwait'},{iata:'MCT',city:'Muscat',country:'Oman'},{iata:'BAH',city:'Manama',country:'Bahrain'},{iata:'AMM',city:'Amman',country:'Jordan'},{iata:'BEY',city:'Beirut',country:'Lebanon'},{iata:'TLV',city:'Tel Aviv',country:'Israel'},{iata:'CAI',city:'Cairo',country:'Egypt'},{iata:'ALX',city:'Alexandria',country:'Egypt'},
+    // Africa
+    {iata:'JNB',city:'Johannesburg',country:'South Africa'},{iata:'CPT',city:'Cape Town',country:'South Africa'},{iata:'DUR',city:'Durban',country:'South Africa'},{iata:'NBO',city:'Nairobi',country:'Kenya'},{iata:'ADD',city:'Addis Ababa',country:'Ethiopia'},{iata:'LOS',city:'Lagos',country:'Nigeria'},{iata:'ABV',city:'Abuja',country:'Nigeria'},{iata:'ACC',city:'Accra',country:'Ghana'},{iata:'DAK',city:'Dakar',country:'Senegal'},{iata:'CMN',city:'Casablanca',country:'Morocco'},{iata:'RAK',city:'Marrakech',country:'Morocco'},{iata:'TUN',city:'Tunis',country:'Tunisia'},{iata:'ALG',city:'Algiers',country:'Algeria'},{iata:'TRP',city:'Tripoli',country:'Libya'},{iata:'DAR',city:'Dar es Salaam',country:'Tanzania'},{iata:'KGL',city:'Kigali',country:'Rwanda'},{iata:'EBB',city:'Kampala',country:'Uganda'},{iata:'MPM',city:'Maputo',country:'Mozambique'},{iata:'LUN',city:'Lusaka',country:'Zambia'},{iata:'HRE',city:'Harare',country:'Zimbabwe'},
+    // Asia
+    {iata:'PEK',city:'Beijing',country:'China'},{iata:'PVG',city:'Shanghai',country:'China'},{iata:'CAN',city:'Guangzhou',country:'China'},{iata:'SZX',city:'Shenzhen',country:'China'},{iata:'CTU',city:'Chengdu',country:'China'},{iata:'HGH',city:'Hangzhou',country:'China'},{iata:'WUH',city:'Wuhan',country:'China'},{iata:'XIY',city:'Xi\'an',country:'China'},{iata:'NKG',city:'Nanjing',country:'China'},{iata:'CKG',city:'Chongqing',country:'China'},{iata:'HKG',city:'Hong Kong',country:'Hong Kong'},{iata:'MFM',city:'Macau',country:'Macau'},{iata:'TPE',city:'Taipei',country:'Taiwan'},{iata:'NRT',city:'Tokyo',country:'Japan'},{iata:'KIX',city:'Osaka',country:'Japan'},{iata:'NGO',city:'Nagoya',country:'Japan'},{iata:'FUK',city:'Fukuoka',country:'Japan'},{iata:'SPK',city:'Sapporo',country:'Japan'},{iata:'ICN',city:'Seoul',country:'South Korea'},{iata:'PUS',city:'Busan',country:'South Korea'},{iata:'BOM',city:'Mumbai',country:'India'},{iata:'DEL',city:'New Delhi',country:'India'},{iata:'BLR',city:'Bangalore',country:'India'},{iata:'HYD',city:'Hyderabad',country:'India'},{iata:'MAA',city:'Chennai',country:'India'},{iata:'CCU',city:'Kolkata',country:'India'},{iata:'AMD',city:'Ahmedabad',country:'India'},{iata:'PNQ',city:'Pune',country:'India'},{iata:'SGN',city:'Ho Chi Minh City',country:'Vietnam'},{iata:'HAN',city:'Hanoi',country:'Vietnam'},{iata:'DAD',city:'Da Nang',country:'Vietnam'},{iata:'BKK',city:'Bangkok',country:'Thailand'},{iata:'CNX',city:'Chiang Mai',country:'Thailand'},{iata:'HKT',city:'Phuket',country:'Thailand'},{iata:'KUL',city:'Kuala Lumpur',country:'Malaysia'},{iata:'SIN',city:'Singapore',country:'Singapore'},{iata:'CGK',city:'Jakarta',country:'Indonesia'},{iata:'DPS',city:'Bali',country:'Indonesia'},{iata:'SUB',city:'Surabaya',country:'Indonesia'},{iata:'MNL',city:'Manila',country:'Philippines'},{iata:'CEB',city:'Cebu',country:'Philippines'},{iata:'RGN',city:'Yangon',country:'Myanmar'},{iata:'PNH',city:'Phnom Penh',country:'Cambodia'},{iata:'REP',city:'Siem Reap',country:'Cambodia'},{iata:'VTE',city:'Vientiane',country:'Laos'},{iata:'DAC',city:'Dhaka',country:'Bangladesh'},{iata:'CMB',city:'Colombo',country:'Sri Lanka'},{iata:'KTM',city:'Kathmandu',country:'Nepal'},{iata:'KBL',city:'Kabul',country:'Afghanistan'},{iata:'TAS',city:'Tashkent',country:'Uzbekistan'},{iata:'ALA',city:'Almaty',country:'Kazakhstan'},
+    // Oceania
+    {iata:'SYD',city:'Sydney',country:'Australia'},{iata:'MEL',city:'Melbourne',country:'Australia'},{iata:'BNE',city:'Brisbane',country:'Australia'},{iata:'PER',city:'Perth',country:'Australia'},{iata:'ADL',city:'Adelaide',country:'Australia'},{iata:'CBR',city:'Canberra',country:'Australia'},{iata:'OOL',city:'Gold Coast',country:'Australia'},{iata:'AKL',city:'Auckland',country:'New Zealand'},{iata:'WLG',city:'Wellington',country:'New Zealand'},{iata:'CHC',city:'Christchurch',country:'New Zealand'},{iata:'NAN',city:'Nadi',country:'Fiji'},
+  ];
+
+  // Get the flight destination city for auto-fill
+  function getFlightDestCity() {
+    if (!tripData) return null;
+    for (const exp of tripData.expenses) {
+      const m = exp.name.match(/[A-Z]{3}\s*→\s*([A-Z]{3})/);
+      if (m) {
+        const iata = m[1];
+        const ap = AIRPORTS.find(a => a.iata === iata);
+        if (ap) return { iata, city: ap.city, country: ap.country };
+        const wc = WORLD_CITIES.find(c => c.iata === iata);
+        if (wc) return wc;
+      }
+    }
+    return null;
+  }
+
+  function filterTMCities() {
+    const q = (document.getElementById('tm-city-input').value || '').toLowerCase().trim();
+    const drop = document.getElementById('tm-city-drop');
+
+    // Dedupe WORLD_CITIES by city+country
+    const seen = new Set();
+    const all = WORLD_CITIES.filter(c => {
+      const key = c.city + '|' + c.country;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const matches = q
+      ? all.filter(c => c.city.toLowerCase().includes(q) || c.country.toLowerCase().includes(q) || (c.iata && c.iata.toLowerCase().includes(q))).slice(0, 30)
+      : all.slice(0, 30);
+
+    if (!matches.length) {
+      drop.innerHTML = `<div style="padding:0.65rem 0.85rem;font-size:0.82rem;color:#6b7280">No cities found.</div>`;
+      drop.style.display = 'block';
+      return;
+    }
+
+    drop.innerHTML = matches.map((c, i) => `
+      <div onclick="selectTMCityObj(${JSON.stringify(c).replace(/"/g,'&quot;')})" style="padding:0.5rem 0.85rem;cursor:pointer;border-bottom:1px solid #f5f5f3;display:flex;align-items:center;gap:0.6rem;font-size:0.84rem" onmouseover="this.style.background='#f5f9ff'" onmouseout="this.style.background=''">
+        <span style="font-weight:700;letter-spacing:0.04em;color:#111;min-width:32px;font-size:0.78rem">${c.iata || ''}</span>
+        <span style="font-weight:600;color:#111">${c.city}</span>
+        <span style="color:#9a9590;font-weight:400;font-size:0.8rem">${c.country}</span>
+      </div>`).join('');
+    drop.style.display = 'block';
+  }
+
+  function selectTMCityObj(c) {
+    if (typeof c === 'string') c = JSON.parse(c);
+    _tmSelectedCity = c.city;
+    document.getElementById('tm-city-input').value = c.city + (c.country ? ', ' + c.country : '');
+    document.getElementById('tm-city-drop').style.display = 'none';
+  }
+
+  function openTMSearch() {
+    document.getElementById('service-drop').style.display = 'none';
+    document.getElementById('tm-keyword').value = '';
+    _tmSelectedCity = '';
+    document.getElementById('tm-city-input').value = '';
+    document.getElementById('tm-city-drop').style.display = 'none';
+    document.getElementById('tm-results').innerHTML = `<div class="tm-empty">Select a city and search to get started.</div>`;
+    document.getElementById('tm-modal').classList.add('open');
+
+    // Auto-fill from flight destination
+    const dest = getFlightDestCity();
+    if (dest) {
+      selectTMCityObj(dest);
+      runTMSearch();
+    }
+  }
+
+  function closeTMModal() {
+    document.getElementById('tm-modal').classList.remove('open');
+    document.getElementById('tm-city-drop').style.display = 'none';
+  }
+
+  async function runTMSearch() {
+    const keyword = document.getElementById('tm-keyword').value.trim();
+    const city    = _tmSelectedCity;
+    const results = document.getElementById('tm-results');
+    results.innerHTML = `<div class="tm-empty">Searching…</div>`;
+
+    const params = new URLSearchParams();
+    if (keyword) params.set('keyword', keyword);
+    if (city)    params.set('city', city);
+    if (!keyword && !city) {
+      results.innerHTML = `<div class="tm-empty">Please select a city first.</div>`;
+      return;
+    }
+
+    try {
+      const res  = await fetch('/api/tickets/search?' + params);
+      const data = await res.json();
+
+      if (data.error === 'no_key') {
+        results.innerHTML = `<div class="tm-empty">Add your Ticketmaster API key to <code>config.py</code> under <code>TICKETMASTER_KEY</code> and restart the server.<br><br><a href="https://developer.ticketmaster.com/products-and-docs/apis/getting-started/" target="_blank" style="color:#026CDF">Get a free key</a></div>`;
+        return;
+      }
+      if (data.error) { results.innerHTML = `<div class="tm-empty">${esc(data.error)}</div>`; return; }
+      if (!data.events || !data.events.length) {
+        results.innerHTML = `<div class="tm-empty">No events found. Try a different search.</div>`;
+        return;
+      }
+
+      window._tmEvents = data.events;
+      results.innerHTML = data.events.map((ev, i) => {
+        const thumb = ev.thumbnail
+          ? `<img class="tm-event-thumb" src="${esc(ev.thumbnail)}" onerror="this.style.display='none'">`
+          : `<div class="tm-event-thumb-placeholder">🎫</div>`;
+        const date = ev.date ? new Date(ev.date + 'T00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+        const venue = [ev.venue, ev.city].filter(Boolean).join(' · ');
+        const price = ev.price_min != null
+          ? `From ${fmt(ev.price_min, 0)}${ev.price_max && ev.price_max !== ev.price_min ? ` – ${fmt(ev.price_max, 0)}` : ''}`
+          : 'Price TBA';
+        return `
+          <div class="tm-event-card" onclick="selectTMEvent(${i})">
+            ${thumb}
+            <div class="tm-event-info">
+              <div class="tm-event-name">${esc(ev.name)}</div>
+              <div class="tm-event-meta">${date}${venue ? ' · ' + esc(venue) : ''}${ev.genre ? ' · ' + esc(ev.genre) : ''}</div>
+              <div class="tm-event-price">${price}</div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch(e) {
+      results.innerHTML = `<div class="tm-empty">Something went wrong. Try again.</div>`;
+    }
+  }
+
+  function selectTMEvent(i) {
+    const ev = window._tmEvents[i];
+    if (!ev) return;
+    document.getElementById('exp-name').value = ev.name;
+    if (ev.price_min != null) {
+      const amtEl = document.getElementById('exp-amount');
+      if (!amtEl.value) { amtEl.value = ev.price_min.toFixed(2); recalcSplits(); }
+    }
+    closeTMModal();
+    toast(`"${ev.name}" added`);
+  }
+
+  document.getElementById('tm-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeTMModal();
+  });
+
+  document.getElementById('tm-keyword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') runTMSearch();
+  });
+
+  // Close city drop when clicking outside
+  document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('tm-city-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('tm-city-drop').style.display = 'none';
+    }
   });
 </script>
 </body>
