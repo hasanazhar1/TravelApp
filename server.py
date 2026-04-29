@@ -4,6 +4,8 @@ import os
 import ssl
 import certifi
 import time
+import hashlib
+import secrets
 import urllib.request
 import urllib.parse
 import json
@@ -44,6 +46,19 @@ def get_db():
 def init_db():
     with get_db() as conn:
         conn.executescript("""
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                salt TEXT NOT NULL,
+                created_at INTEGER DEFAULT (strftime('%s', 'now'))
+            );
+            CREATE TABLE IF NOT EXISTS sessions (
+                token TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                created_at INTEGER DEFAULT (strftime('%s', 'now')),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
             CREATE TABLE IF NOT EXISTS trips (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -80,6 +95,95 @@ def init_db():
 init_db()
 
 COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#85C1E9']
+
+# ── AUTH HELPERS ──
+def _hash_password(password, salt=None):
+    if salt is None:
+        salt = secrets.token_hex(16)
+    key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 200_000)
+    return key.hex(), salt
+
+def _get_user_from_token(token):
+    if not token:
+        return None
+    with get_db() as conn:
+        row = conn.execute(
+            'SELECT u.id, u.email FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = ?',
+            (token,)
+        ).fetchone()
+    return dict(row) if row else None
+
+def _current_user():
+    auth = request.headers.get('Authorization', '')
+    token = auth.removeprefix('Bearer ').strip()
+    return _get_user_from_token(token)
+
+# ── AUTH ENDPOINTS ──
+@app.post('/api/auth/signup')
+def signup():
+    data     = request.get_json(silent=True) or {}
+    email    = (data.get('email') or '').strip().lower()
+    password = (data.get('password') or '')
+
+    if not email or '@' not in email or '.' not in email.split('@')[-1]:
+        return jsonify(error='Please enter a valid email address.'), 400
+    if len(password) < 6:
+        return jsonify(error='Password must be at least 6 characters.'), 400
+
+    pw_hash, salt = _hash_password(password)
+    user_id = str(uuid.uuid4())
+    try:
+        with get_db() as conn:
+            conn.execute(
+                'INSERT INTO users (id, email, password_hash, salt) VALUES (?, ?, ?, ?)',
+                (user_id, email, pw_hash, salt)
+            )
+    except sqlite3.IntegrityError:
+        return jsonify(error='An account with this email already exists.'), 409
+
+    token = secrets.token_hex(32)
+    with get_db() as conn:
+        conn.execute('INSERT INTO sessions (token, user_id) VALUES (?, ?)', (token, user_id))
+
+    return jsonify(token=token, email=email, id=user_id)
+
+@app.post('/api/auth/login')
+def login():
+    data     = request.get_json(silent=True) or {}
+    email    = (data.get('email') or '').strip().lower()
+    password = (data.get('password') or '')
+
+    with get_db() as conn:
+        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+
+    if not user:
+        return jsonify(error='No account found with that email.'), 401
+
+    pw_hash, _ = _hash_password(password, user['salt'])
+    if not secrets.compare_digest(pw_hash, user['password_hash']):
+        return jsonify(error='Incorrect password.'), 401
+
+    token = secrets.token_hex(32)
+    with get_db() as conn:
+        conn.execute('INSERT INTO sessions (token, user_id) VALUES (?, ?)', (token, user['id']))
+
+    return jsonify(token=token, email=email, id=user['id'])
+
+@app.post('/api/auth/logout')
+def logout():
+    auth  = request.headers.get('Authorization', '')
+    token = auth.removeprefix('Bearer ').strip()
+    if token:
+        with get_db() as conn:
+            conn.execute('DELETE FROM sessions WHERE token = ?', (token,))
+    return jsonify(ok=True)
+
+@app.get('/api/auth/me')
+def auth_me():
+    user = _current_user()
+    if not user:
+        return jsonify(error='Not authenticated'), 401
+    return jsonify(email=user['email'], id=user['id'])
 
 # ── LOAD .env (no third-party libs needed) ──
 def _load_dotenv(path='.env'):

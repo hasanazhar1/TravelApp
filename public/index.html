@@ -78,6 +78,52 @@
       font-size: 1.1rem;
     }
 
+    /* ── AUTH CARD ── */
+    .auth-card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+      padding: 2rem 2.2rem 2.2rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 1.6rem;
+      gap: 0;
+    }
+
+    .auth-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      margin-bottom: -1.5px;
+      padding: 0.6rem 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text2);
+      cursor: pointer;
+      transition: color 0.18s, border-color 0.18s;
+      border-radius: 0;
+    }
+
+    .auth-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .auth-error {
+      color: var(--red);
+      font-size: 0.82rem;
+      font-weight: 500;
+      min-height: 1.1em;
+      margin-top: -0.25rem;
+    }
+
+    /* ── TRIP SECTION (post-login) ── */
     .cards {
       display: flex;
       gap: 1.5rem;
@@ -96,6 +142,28 @@
       min-width: 280px;
       box-shadow: var(--shadow-sm);
     }
+
+    .signout-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.85rem;
+    }
+
+    .signout-btn {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 8px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+
+    .signout-btn:hover { background: rgba(255,255,255,0.30); }
 
     .card h2 {
       font-size: 1.1rem;
@@ -373,6 +441,22 @@
 
     .stat-owed-sub.settled {
       color: var(--green);
+    }
+
+    /* ── SPLIT TEXT ANIMATION (ReactBits port) ── */
+    @keyframes splitCharIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .split-char {
+      display: inline-block;
+      opacity: 0;
+      animation: splitCharIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .split-char-sm {
+      display: inline-block;
+      opacity: 0;
+      animation: splitCharIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
     /* ── ANIMATED LIST (ReactBits port) ── */
@@ -1816,33 +1900,58 @@
 <!-- LANDING PAGE -->
 <div id="landing">
   <div class="hero">
-    <img src="/logo.png" alt="TripSplit" style="width:108px;height:108px;display:block;margin:0 auto 0.4rem;border-radius:22px" />
-    <p style="color:white;font-weight:800;font-size:1rem;letter-spacing:0.04em;text-align:center;margin-top:0.3rem;opacity:0.92">TripSplit</p>
+    <img src="/logoblue.jpg" alt="TripSplit" style="width:108px;height:108px;display:block;margin:0 auto 0.4rem;border-radius:22px" />
   </div>
 
-  <div class="cards">
-    <div class="card">
-      <h2>New Trip</h2>
+  <!-- AUTH SECTION -->
+  <div id="auth-section">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+        <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+      </div>
       <div class="input-group">
-        <input type="text" id="new-trip-name" placeholder="Trip name" />
-        <div class="dest-wrap" style="flex-direction:column;align-items:stretch">
-          <div id="dest-tags"></div>
-          <div style="display:flex;gap:0.5rem;position:relative">
-            <input type="text" id="new-trip-dest" placeholder="Add a destination…" autocomplete="off" style="flex:1" />
-            <button class="dice-btn" id="dice-btn" title="Random destination" onclick="rollDice()">⚄</button>
-            <div id="dest-drop"></div>
+        <input type="email" id="auth-email" placeholder="Email address" autocomplete="email"
+               onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()" />
+        <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')submitAuth()" />
+        <div id="auth-error" class="auth-error"></div>
+        <button class="btn-primary" id="auth-submit" onclick="submitAuth()">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRIP SECTION (shown after login) -->
+  <div id="trip-section" style="display:none">
+    <div class="cards">
+      <div class="card">
+        <h2>New Trip</h2>
+        <div class="input-group">
+          <input type="text" id="new-trip-name" placeholder="Trip name" />
+          <div class="dest-wrap" style="flex-direction:column;align-items:stretch">
+            <div id="dest-tags"></div>
+            <div style="display:flex;gap:0.5rem;position:relative">
+              <input type="text" id="new-trip-dest" placeholder="Add a destination…" autocomplete="off" style="flex:1" />
+              <button class="dice-btn" id="dice-btn" title="Random destination" onclick="rollDice()">⚄</button>
+              <div id="dest-drop"></div>
+            </div>
           </div>
+          <button class="btn-primary" onclick="createTrip()">Create Trip</button>
         </div>
-        <button class="btn-primary" onclick="createTrip()">Create Trip</button>
+      </div>
+
+      <div class="card">
+        <h2>Join Existing Trip</h2>
+        <div class="input-group">
+          <input type="text" id="join-trip-id" placeholder="Trip code" />
+          <button class="btn-primary" onclick="joinTrip()">Join Trip</button>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Join Existing Trip</h2>
-      <div class="input-group">
-        <input type="text" id="join-trip-id" placeholder="Trip code" />
-        <button class="btn-primary" onclick="joinTrip()">Join Trip</button>
-      </div>
+    <div class="signout-row">
+      <span id="auth-user-email"></span>
+      <button class="signout-btn" onclick="signOut()">Sign Out</button>
     </div>
   </div>
 </div>
@@ -1898,7 +2007,7 @@
       <!-- Summary -->
       <div class="summary-grid" id="summary-grid">
         <div class="stat-total-wrap">
-          <div class="stat-total-label">Total Trip Cost</div>
+          <div class="stat-total-label" id="stat-total-label">Total Trip Cost</div>
           <div class="stat-total-value" id="stat-total">$0</div>
           <div class="stat-owed-sub" id="stat-owed-sub"></div>
         </div>
@@ -1908,8 +2017,8 @@
       <div class="expenses-header">
         <h2>Expenses</h2>
         <div style="display:flex;gap:0.5rem">
-          <button class="btn-outline-accent btn-sm" onclick="openFlightSearch()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 21 4s-2 0-3.5 1.5L14 9 5.8 7.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 3.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg> Search Flights</button>
-          <button class="btn-outline-accent btn-sm" onclick="openLodging()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> Find Lodging</button>
+          <button class="btn-outline-accent btn-sm" style="border-top-left-radius:20px;border-bottom-left-radius:20px;padding-left:9px" onclick="openFlightSearch()"><img src="/download.png" width="18" height="18" style="display:block;flex-shrink:0"> Search Flights</button>
+          <button class="btn-outline-accent btn-sm" style="padding-left:9px" onclick="openLodging()"><img src="/download-1.png" width="18" height="18" style="display:block;flex-shrink:0;align-self:flex-end"> Find Lodging</button>
           <button class="btn-primary btn-sm" onclick="openAddExpense()">+ Add Expense</button>
         </div>
       </div>
@@ -2183,6 +2292,123 @@
     return svg.replace('<svg ', `<svg width="${size}" height="${size}" style="display:inline-block;vertical-align:middle;flex-shrink:0" `);
   }
 
+  // ── AUTH STATE ──
+  let _authToken = localStorage.getItem('ts_token') || null;
+  let _authEmail = localStorage.getItem('ts_email') || null;
+
+  function _authHeaders() {
+    return _authToken ? { 'Authorization': 'Bearer ' + _authToken } : {};
+  }
+
+  function _saveAuth(token, email) {
+    _authToken = token;
+    _authEmail = email;
+    localStorage.setItem('ts_token', token);
+    localStorage.setItem('ts_email', email);
+  }
+
+  function _clearAuth() {
+    _authToken = null;
+    _authEmail = null;
+    localStorage.removeItem('ts_token');
+    localStorage.removeItem('ts_email');
+  }
+
+  let _authTab = 'signin';
+
+  function switchAuthTab(tab) {
+    _authTab = tab;
+    document.getElementById('tab-signin').classList.toggle('active', tab === 'signin');
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+    document.getElementById('auth-submit').textContent = tab === 'signin' ? 'Sign In' : 'Create Account';
+    document.getElementById('auth-error').textContent = '';
+    document.getElementById('auth-password').autocomplete = tab === 'signin' ? 'current-password' : 'new-password';
+  }
+
+  async function submitAuth() {
+    const email    = (document.getElementById('auth-email').value || '').trim();
+    const password = document.getElementById('auth-password').value || '';
+    const errEl    = document.getElementById('auth-error');
+    const btn      = document.getElementById('auth-submit');
+
+    errEl.textContent = '';
+    if (!email) { errEl.textContent = 'Please enter your email.'; return; }
+    if (!password) { errEl.textContent = 'Please enter your password.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = _authTab === 'signin' ? 'Signing in…' : 'Creating account…';
+
+    try {
+      const endpoint = _authTab === 'signin' ? '/api/auth/login' : '/api/auth/signup';
+      const res  = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Something went wrong.';
+        return;
+      }
+
+      _saveAuth(data.token, data.email);
+      showTripSection();
+    } catch (e) {
+      errEl.textContent = 'Network error. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = _authTab === 'signin' ? 'Sign In' : 'Create Account';
+    }
+  }
+
+  async function signOut() {
+    if (_authToken) {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + _authToken }
+      }).catch(() => {});
+    }
+    _clearAuth();
+    showAuthSection();
+  }
+
+  function showAuthSection() {
+    document.getElementById('auth-section').style.display = '';
+    document.getElementById('trip-section').style.display = 'none';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('auth-password').value = '';
+    document.getElementById('auth-error').textContent = '';
+    switchAuthTab('signin');
+  }
+
+  function showTripSection() {
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('trip-section').style.display = '';
+    const emailEl = document.getElementById('auth-user-email');
+    if (emailEl) emailEl.textContent = _authEmail || '';
+  }
+
+  // On page load — check if already logged in
+  (async function initAuth() {
+    if (!_authToken) { showAuthSection(); return; }
+    try {
+      const res = await fetch('/api/auth/me', { headers: _authHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        _authEmail = data.email;
+        localStorage.setItem('ts_email', data.email);
+        showTripSection();
+      } else {
+        _clearAuth();
+        showAuthSection();
+      }
+    } catch {
+      // Network down — still show trip section if token exists
+      showTripSection();
+    }
+  })();
+
   let tripData = null;
   let currentTripId = null;
 
@@ -2193,6 +2419,8 @@
     tripData = null;
     currentTripId = null;
     history.pushState({}, '', '/');
+    // Return to trip section if logged in, auth section if not
+    if (_authToken) { showTripSection(); } else { showAuthSection(); }
   }
 
   function showApp() {
@@ -2405,13 +2633,43 @@
     updateGrads();
   }
 
+  // ── SPLIT TEXT ANIMATION (ReactBits port) ──
+  function splitTextAnimate(el, text, { charDelay = 38, duration = 0.75, cls = 'split-char' } = {}) {
+    if (!el) return;
+    el.innerHTML = '';
+    [...text].forEach((char, i) => {
+      if (char === ' ') {
+        const sp = document.createElement('span');
+        sp.style.cssText = 'display:inline-block;width:0.28em';
+        el.appendChild(sp);
+      } else {
+        const sp = document.createElement('span');
+        sp.className = cls;
+        sp.textContent = char;
+        sp.style.animationDelay = `${i * charDelay}ms`;
+        sp.style.animationDuration = `${duration}s`;
+        el.appendChild(sp);
+      }
+    });
+  }
+
   function renderSummary() {
     const total = tripData.expenses.reduce((s, e) => s + e.total_amount, 0);
     const paid  = tripData.expenses.reduce((s, e) =>
       s + e.splits.reduce((ss, sp) => ss + (sp.paid ? sp.amount : 0), 0), 0);
     const owed  = total - paid;
 
-    document.getElementById('stat-total').textContent = fmt(total);
+    splitTextAnimate(
+      document.getElementById('stat-total-label'),
+      'Total Trip Cost',
+      { charDelay: 22, duration: 0.55, cls: 'split-char-sm' }
+    );
+
+    splitTextAnimate(
+      document.getElementById('stat-total'),
+      fmt(total),
+      { charDelay: 45, duration: 0.8 }
+    );
 
     const subEl = document.getElementById('stat-owed-sub');
     if (subEl) {
