@@ -63,6 +63,7 @@ def init_db():
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
                 destination TEXT DEFAULT '',
+                start_date TEXT DEFAULT '',
                 created_at INTEGER DEFAULT (strftime('%s', 'now'))
             );
             CREATE TABLE IF NOT EXISTS members (
@@ -90,9 +91,24 @@ def init_db():
                 FOREIGN KEY (expense_id) REFERENCES expenses(id),
                 FOREIGN KEY (member_id) REFERENCES members(id)
             );
+            CREATE TABLE IF NOT EXISTS user_trips (
+                user_id TEXT NOT NULL,
+                trip_id TEXT NOT NULL,
+                joined_at INTEGER DEFAULT (strftime('%s', 'now')),
+                PRIMARY KEY (user_id, trip_id),
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (trip_id) REFERENCES trips(id)
+            );
         """)
 
 init_db()
+
+# migrations: add columns to trips if missing
+with get_db() as _mc:
+    try: _mc.execute('ALTER TABLE trips ADD COLUMN owner_id TEXT')
+    except Exception: pass
+    try: _mc.execute("ALTER TABLE trips ADD COLUMN start_date TEXT DEFAULT ''")
+    except Exception: pass
 
 COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#85C1E9']
 
@@ -609,17 +625,80 @@ def booking_search():
 
 # ── TRIPS ──
 
+@app.get('/api/trips')
+def list_trips():
+    user = _current_user()
+    if not user:
+        return jsonify(error='Not authenticated'), 401
+    with get_db() as conn:
+        rows = conn.execute(
+            '''SELECT DISTINCT t.id, t.name, t.destination, t.start_date, t.created_at, t.owner_id,
+                      (SELECT m.name FROM members m WHERE m.trip_id = t.id ORDER BY rowid ASC LIMIT 1) as creator_name
+               FROM trips t
+               LEFT JOIN user_trips ut ON ut.trip_id = t.id AND ut.user_id = ?
+               WHERE t.owner_id = ? OR ut.user_id = ?
+               ORDER BY t.created_at DESC''',
+            (user['id'], user['id'], user['id'])
+        ).fetchall()
+    return jsonify(trips=[dict(r) for r in rows])
+
+@app.post('/api/trips/<trip_id>/join')
+def join_trip(trip_id):
+    user = _current_user()
+    if not user:
+        return jsonify(error='Not authenticated'), 401
+    with get_db() as conn:
+        trip = conn.execute('SELECT id FROM trips WHERE id = ?', (trip_id,)).fetchone()
+        if not trip:
+            return jsonify(error='Trip not found'), 404
+        conn.execute(
+            'INSERT OR IGNORE INTO user_trips (user_id, trip_id) VALUES (?, ?)',
+            (user['id'], trip_id)
+        )
+    return jsonify(ok=True)
+
 @app.post('/api/trips')
 def create_trip():
     data = request.json
     name = (data.get('name') or '').strip()
     if not name:
         return jsonify(error='Trip name required'), 400
+    user = _current_user()
     trip_id = str(uuid.uuid4())[:8]
+    start_date = (data.get('start_date') or '').strip()
     with get_db() as conn:
-        conn.execute('INSERT INTO trips (id, name, destination) VALUES (?, ?, ?)',
-                     (trip_id, name, data.get('destination') or ''))
+        conn.execute('INSERT INTO trips (id, name, destination, start_date, owner_id) VALUES (?, ?, ?, ?, ?)',
+                     (trip_id, name, data.get('destination') or '', start_date, user['id'] if user else None))
+        # Auto-add the creator as the first member
+        creator_name = (data.get('creator_name') or '').strip()
+        if not creator_name and user:
+            creator_name = user['email'].split('@')[0]
+        if creator_name:
+            member_id = str(uuid.uuid4())
+            conn.execute('INSERT INTO members (id, trip_id, name, color) VALUES (?, ?, ?, ?)',
+                         (member_id, trip_id, creator_name, COLORS[0]))
     return jsonify(id=trip_id, name=name, destination=data.get('destination') or '')
+
+@app.patch('/api/trips/<trip_id>')
+def update_trip(trip_id):
+    user = _current_user()
+    if not user:
+        return jsonify(error='Not authenticated'), 401
+    data = request.json or {}
+    name = (data.get('name') or '').strip()
+    destination = (data.get('destination') or '').strip()
+    start_date = (data.get('start_date') or '').strip()
+    if not name:
+        return jsonify(error='Trip name required'), 400
+    with get_db() as conn:
+        trip = conn.execute('SELECT * FROM trips WHERE id = ?', (trip_id,)).fetchone()
+        if not trip:
+            return jsonify(error='Trip not found'), 404
+        if trip['owner_id'] != user['id']:
+            return jsonify(error='Only the trip creator can edit it'), 403
+        conn.execute('UPDATE trips SET name = ?, destination = ?, start_date = ? WHERE id = ?',
+                     (name, destination, start_date, trip_id))
+    return jsonify(ok=True, name=name, destination=destination, start_date=start_date)
 
 @app.get('/api/trips/<trip_id>')
 def get_trip(trip_id):

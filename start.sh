@@ -37,8 +37,8 @@ python3 server.py &
 SERVER_PID=$!
 sleep 1.5
 
-# Open browser locally
-open http://localhost:3000 2>/dev/null || true
+# Open browser locally — ?fresh=1 clears any saved session so onboarding always shows
+open "http://localhost:3000?fresh=1" 2>/dev/null || true
 
 if [[ "$SHARE" == "true" ]]; then
   echo ""
