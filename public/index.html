@@ -516,7 +516,7 @@
 
     .stat-total-value {
       font-size: 2.8rem;
-      font-weight: 700;
+      font-weight: 400;
       color: var(--text);
       line-height: 1.1;
       letter-spacing: -0.02em;
@@ -612,21 +612,84 @@
       margin-top: 0.1rem;
       color: #555;
     }
-    .ub-edit-btn {
+    .ub-settings-btn {
       position: absolute;
       top: 0.6rem;
       right: 0.6rem;
       background: none;
       border: none;
-      font-size: 0.9rem;
+      font-size: 1rem;
       cursor: pointer;
-      padding: 0.2rem 0.35rem;
+      padding: 0.25rem 0.4rem;
       border-radius: 6px;
       opacity: 0;
       transition: opacity 0.15s ease, background 0.15s ease;
+      color: #888;
+      z-index: 2;
     }
-    .upcoming-banner:hover .ub-edit-btn { opacity: 1; }
-    .ub-edit-btn:hover { background: rgba(0,0,0,0.06); }
+    .upcoming-banner:hover .ub-settings-btn { opacity: 1; }
+    .ub-settings-btn:hover { background: rgba(0,0,0,0.06); color: #333; }
+    .ub-settings-drop {
+      position: absolute;
+      top: 2.4rem;
+      right: 0.6rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      min-width: 210px;
+      z-index: 10;
+      display: none;
+      overflow: hidden;
+    }
+    .ub-settings-drop.open { display: block; }
+    .ub-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: none;
+      background: none;
+      font-size: 0.85rem;
+      color: #333;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s ease;
+    }
+    .ub-drop-item:hover { background: #f5f5f5; }
+    .ub-drop-item.danger { color: #dc2626; }
+    .ub-drop-item.danger:hover { background: rgba(220,38,38,0.06); }
+    .ub-drop-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 0;
+    }
+    .ub-drop-toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      border-radius: 10px;
+      background: #ccc;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .ub-drop-toggle.on { background: var(--accent); }
+    .ub-drop-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s ease;
+    }
+    .ub-drop-toggle.on::after { transform: translateX(16px); }
 
     .cost-bar-wrap {
       width: 100%;
@@ -1023,6 +1086,37 @@
 
     /* ── SPLITS EDITOR ── */
     .splits-editor { margin-top: 0.5rem; }
+
+    .exp-tab-row {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0.75rem;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .exp-tab {
+      flex: 1;
+      padding: 0.5rem 0;
+      border: none;
+      background: #f5f5f5;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text2);
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+    .exp-tab:first-child { border-right: 1px solid var(--border); }
+    .exp-tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .exp-tab:not(.active):hover {
+      background: #eee;
+    }
+    .exp-panel {
+      transition: opacity 0.22s ease;
+    }
 
     .split-row {
       display: flex;
@@ -2228,11 +2322,12 @@
       bottom: calc(100% + 10px);
       left: 50%;
       transform: translateX(-50%) translateY(4px);
-      background: rgba(20,20,20,0.80);
-      backdrop-filter: blur(6px);
-      color: #fff;
+      background: #fff;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      color: #111;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 400;
       padding: 4px 10px;
       border-radius: 7px;
       white-space: nowrap;
@@ -2803,10 +2898,39 @@
       margin-left: 0.3rem;
     }
 
+    .trips-collapse-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.4rem 0;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .trips-collapse-btn:hover { opacity: 0.8; }
+    .trips-chevron {
+      display: inline-block;
+      font-size: 1.5rem;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      line-height: 1;
+    }
+    .trips-chevron.open {
+      transform: rotate(90deg);
+    }
+    .trips-actions-anim {
+      overflow: hidden;
+      transition: height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;
+    }
+
     .trips-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.2rem;
+      margin-bottom: 2rem;
     }
 
     @media(max-width:600px) { .trips-actions { grid-template-columns: 1fr; } }
@@ -3033,7 +3157,10 @@
     </div>
 
     <!-- Create & Join -->
-    <div class="trips-actions">
+    <button class="trips-collapse-btn" id="trips-collapse-btn" onclick="toggleTripsActions()">
+      Create Trip or Join Trip <svg class="trips-chevron" id="trips-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+    </button>
+    <div class="trips-actions" id="trips-actions-wrap" style="display:none">
       <div class="card" style="padding:1.5rem">
         <h2 style="margin-bottom:1rem">New Trip</h2>
         <div class="input-group">
@@ -3221,15 +3348,18 @@
     </div>
 
     <div class="form-group">
-      <label>Paid By</label>
-      <select id="exp-paid-by">
-        <option value="">-- Select who paid --</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Split Between</label>
-      <div class="splits-editor" id="splits-editor"></div>
+      <div class="exp-tab-row">
+        <button class="exp-tab active" id="exp-tab-paid" onclick="switchExpTab('paid')">Paid By</button>
+        <button class="exp-tab" id="exp-tab-split" onclick="switchExpTab('split')">Split By</button>
+      </div>
+      <div id="exp-panel-paid" class="exp-panel">
+        <select id="exp-paid-by">
+          <option value="">-- Select who paid --</option>
+        </select>
+      </div>
+      <div id="exp-panel-split" class="exp-panel" style="display:none;opacity:0">
+        <div class="splits-editor" id="splits-editor"></div>
+      </div>
     </div>
 
     <div class="modal-actions">
@@ -3588,8 +3718,21 @@
           </div>`;
         }
 
+        const membersCanAdd = t.members_can_add ? true : false;
         return `<div class="upcoming-banner" id="trip-card-${t.id}" onclick="openTripFromList('${t.id}')">
-          ${isOwner ? `<button class="ub-edit-btn" onclick="startEditTripCard(event,'${t.id}')" title="Edit trip">✏️</button>` : ''}
+          ${isOwner ? `
+          <button class="ub-settings-btn" onclick="toggleTripSettings(event,'${t.id}')" title="Trip settings">⚙️</button>
+          <div class="ub-settings-drop" id="trip-settings-${t.id}">
+            <button class="ub-drop-item" onclick="startEditTripCard(event,'${t.id}')">✏️ Edit Trip</button>
+            <div class="ub-drop-sep"></div>
+            <button class="ub-drop-item" onclick="toggleMembersCanAdd(event,'${t.id}',${membersCanAdd ? 'true' : 'false'})">
+              <span style="flex:1">Members can add expenses</span>
+              <span class="ub-drop-toggle ${membersCanAdd ? 'on' : ''}" id="toggle-mca-${t.id}"></span>
+            </button>
+            <div class="ub-drop-sep"></div>
+            <button class="ub-drop-item danger" onclick="deleteTripCard(event,'${t.id}','${esc(t.name)}')">🗑️ Delete Trip</button>
+          </div>
+          ` : ''}
           <div class="ub-left">
             <div class="ub-name">${esc(t.name)}</div>
             ${destStr ? `<div class="ub-dest">${esc(destStr)}</div>` : ''}
@@ -3700,6 +3843,125 @@
     } catch {
       toast('Failed to save. Please try again.');
       saveBtn.disabled = false; saveBtn.textContent = 'Save';
+    }
+  }
+
+  let _tripsActionsOpen = false;
+  let _tripsAnimating = false;
+  function toggleTripsActions() {
+    const wrap = document.getElementById('trips-actions-wrap');
+    const chevron = document.getElementById('trips-chevron');
+
+    // If mid-animation, force finish immediately
+    if (_tripsAnimating) {
+      wrap.getAnimations().forEach(a => a.finish());
+      wrap.classList.remove('trips-actions-anim');
+      wrap.style.height = '';
+      wrap.style.opacity = '';
+      wrap.style.display = _tripsActionsOpen ? '' : 'none';
+      _tripsAnimating = false;
+    }
+
+    _tripsActionsOpen = !_tripsActionsOpen;
+    chevron.classList.toggle('open', _tripsActionsOpen);
+    _tripsAnimating = true;
+
+    if (_tripsActionsOpen) {
+      wrap.style.display = '';
+      wrap.style.height = '0';
+      wrap.style.opacity = '0';
+      wrap.classList.add('trips-actions-anim');
+      const h = wrap.scrollHeight;
+      requestAnimationFrame(() => {
+        wrap.style.height = h + 'px';
+        wrap.style.opacity = '1';
+      });
+      setTimeout(() => {
+        if (_tripsActionsOpen) {
+          wrap.style.height = '';
+          wrap.classList.remove('trips-actions-anim');
+        }
+        _tripsAnimating = false;
+      }, 360);
+    } else {
+      wrap.classList.add('trips-actions-anim');
+      wrap.style.height = wrap.scrollHeight + 'px';
+      requestAnimationFrame(() => {
+        wrap.style.height = '0';
+        wrap.style.opacity = '0';
+      });
+      setTimeout(() => {
+        if (!_tripsActionsOpen) {
+          wrap.style.display = 'none';
+          wrap.style.height = '';
+          wrap.classList.remove('trips-actions-anim');
+        }
+        _tripsAnimating = false;
+      }, 360);
+    }
+  }
+
+  function toggleTripSettings(e, tripId) {
+    e.stopPropagation();
+    // Close any other open dropdowns first
+    document.querySelectorAll('.ub-settings-drop.open').forEach(d => {
+      if (d.id !== 'trip-settings-' + tripId) d.classList.remove('open');
+    });
+    const drop = document.getElementById('trip-settings-' + tripId);
+    if (drop) drop.classList.toggle('open');
+  }
+
+  // Close settings dropdown when clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.ub-settings-drop.open').forEach(d => d.classList.remove('open'));
+  });
+
+  async function toggleMembersCanAdd(e, tripId, currentVal) {
+    e.stopPropagation();
+    const newVal = !currentVal;
+    try {
+      const res = await fetch('/api/trips/' + tripId + '/permissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ..._authHeaders() },
+        body: JSON.stringify({ members_can_add: newVal })
+      });
+      const data = await res.json();
+      if (data.error) { toast(data.error); return; }
+      // Update the toggle visual
+      const toggle = document.getElementById('toggle-mca-' + tripId);
+      if (toggle) toggle.classList.toggle('on', newVal);
+      // Update cached trip
+      if (_cachedTrips) {
+        const t = _cachedTrips.find(x => x.id === tripId);
+        if (t) t.members_can_add = newVal ? 1 : 0;
+      }
+      // Update the onclick to reflect new state
+      const btn = e.target.closest('.ub-drop-item');
+      if (btn) btn.setAttribute('onclick', `toggleMembersCanAdd(event,'${tripId}',${newVal})`);
+      toast(newVal ? 'Members can now add expenses' : 'Only you can add expenses');
+    } catch {
+      toast('Failed to update. Please try again.');
+    }
+  }
+
+  async function deleteTripCard(e, tripId, tripName) {
+    e.stopPropagation();
+    if (!confirm(`Delete "${tripName}"? This will permanently remove the trip, all expenses, and all members. This cannot be undone.`)) return;
+    try {
+      const res = await fetch('/api/trips/' + tripId, {
+        method: 'DELETE',
+        headers: _authHeaders()
+      });
+      const data = await res.json();
+      if (data.error) { toast(data.error); return; }
+      // If this was the currently open trip, clear it
+      if (tripData && tripData.id === tripId) {
+        tripData = null;
+      }
+      toast('Trip deleted');
+      loadTripsScreen();
+    } catch {
+      toast('Failed to delete. Please try again.');
     }
   }
 
@@ -4337,10 +4599,19 @@
     document.getElementById('trip-name-display').textContent = tripData.name;
     document.getElementById('trip-dest-display').textContent = tripData.destination || '';
     document.getElementById('share-code').textContent = tripData.id;
+    // Default view: creator sees Group, members see Me
+    const isOwner = tripData.owner_id === _authUserId;
+    setViewMode(isOwner ? 'group' : 'me');
     renderMembers();
     renderExpenses();
     renderSummary();
     renderBalances();
+    // Dim expense buttons if member can't add
+    const canAdd = _canAddExpenses();
+    document.querySelectorAll('.expenses-header .btn-primary, .expenses-header .btn-outline-accent').forEach(btn => {
+      btn.style.opacity = canAdd ? '' : '0.45';
+      btn.style.pointerEvents = canAdd ? '' : 'auto'; // still clickable to show toast
+    });
   }
 
   function renderMembers() {
@@ -4777,7 +5048,18 @@
   }
 
   // ── EXPENSES ──
+  function _canAddExpenses() {
+    if (!tripData) return false;
+    if (tripData.owner_id === _authUserId) return true;
+    if (tripData.members_can_add) return true;
+    return false;
+  }
+
   function openAddExpense() {
+    if (!_canAddExpenses()) {
+      toast('Only the trip creator can add expenses. Ask them to enable member contributions in trip settings.');
+      return;
+    }
     const modal = document.getElementById('expense-modal');
     document.getElementById('exp-name').value = '';
     document.getElementById('exp-amount').value = '';
@@ -4788,11 +5070,38 @@
 
     renderSplitsEditor();
 
+    // Reset to Paid By tab
+    switchExpTab('paid');
+
     const warning = document.getElementById('no-members-warning');
     warning.style.display = tripData.members.length === 0 ? 'block' : 'none';
 
     modal.classList.add('open');
     document.getElementById('exp-name').focus();
+  }
+
+  function switchExpTab(tab) {
+    const paidTab   = document.getElementById('exp-tab-paid');
+    const splitTab  = document.getElementById('exp-tab-split');
+    const paidPanel = document.getElementById('exp-panel-paid');
+    const splitPanel = document.getElementById('exp-panel-split');
+
+    if (tab === 'paid') {
+      paidTab.classList.add('active');
+      splitTab.classList.remove('active');
+      paidPanel.style.display = '';
+      paidPanel.style.opacity = '1';
+      splitPanel.style.opacity = '0';
+      setTimeout(() => { splitPanel.style.display = 'none'; }, 220);
+    } else {
+      splitTab.classList.add('active');
+      paidTab.classList.remove('active');
+      splitPanel.style.display = '';
+      requestAnimationFrame(() => { splitPanel.style.opacity = '1'; });
+      paidPanel.style.opacity = '0';
+      setTimeout(() => { paidPanel.style.display = 'none'; }, 220);
+      renderSplitsEditor();
+    }
   }
 
   function renderSplitsEditor() {
@@ -4850,7 +5159,7 @@
 
     const res = await fetch(`/api/trips/${currentTripId}/expenses`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ..._authHeaders() },
       body: JSON.stringify({ name, total_amount: amount, paid_by: paidBy || null, splits })
     });
     const data = await res.json();
@@ -5755,6 +6064,10 @@
   }
 
   function openFlightSearch() {
+    if (!_canAddExpenses()) {
+      toast('Only the trip creator can search flights. Ask them to enable member contributions in trip settings.');
+      return;
+    }
     document.getElementById('flight-modal').classList.add('open');
     document.getElementById('flight-results').innerHTML = '';
     flightLegsState = [{}];
@@ -6134,6 +6447,10 @@
   }
 
   function openLodging() {
+    if (!_canAddExpenses()) {
+      toast('Only the trip creator can search lodging. Ask them to enable member contributions in trip settings.');
+      return;
+    }
     document.getElementById('lodging-modal').classList.add('open');
 
     // Init custom date pickers (clone to reset listeners each open)

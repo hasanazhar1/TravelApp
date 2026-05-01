@@ -109,6 +109,8 @@ with get_db() as _mc:
     except Exception: pass
     try: _mc.execute("ALTER TABLE trips ADD COLUMN start_date TEXT DEFAULT ''")
     except Exception: pass
+    try: _mc.execute("ALTER TABLE trips ADD COLUMN members_can_add INTEGER DEFAULT 0")
+    except Exception: pass
 
 COLORS = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#85C1E9']
 
@@ -632,7 +634,7 @@ def list_trips():
         return jsonify(error='Not authenticated'), 401
     with get_db() as conn:
         rows = conn.execute(
-            '''SELECT DISTINCT t.id, t.name, t.destination, t.start_date, t.created_at, t.owner_id,
+            '''SELECT DISTINCT t.id, t.name, t.destination, t.start_date, t.created_at, t.owner_id, t.members_can_add,
                       (SELECT m.name FROM members m WHERE m.trip_id = t.id ORDER BY rowid ASC LIMIT 1) as creator_name
                FROM trips t
                LEFT JOIN user_trips ut ON ut.trip_id = t.id AND ut.user_id = ?
@@ -700,6 +702,39 @@ def update_trip(trip_id):
                      (name, destination, start_date, trip_id))
     return jsonify(ok=True, name=name, destination=destination, start_date=start_date)
 
+@app.delete('/api/trips/<trip_id>')
+def delete_trip(trip_id):
+    user = _current_user()
+    if not user:
+        return jsonify(error='Not authenticated'), 401
+    with get_db() as conn:
+        trip = conn.execute('SELECT * FROM trips WHERE id = ?', (trip_id,)).fetchone()
+        if not trip:
+            return jsonify(error='Trip not found'), 404
+        if trip['owner_id'] != user['id']:
+            return jsonify(error='Only the trip creator can delete it'), 403
+        conn.execute('DELETE FROM splits WHERE expense_id IN (SELECT id FROM expenses WHERE trip_id = ?)', (trip_id,))
+        conn.execute('DELETE FROM expenses WHERE trip_id = ?', (trip_id,))
+        conn.execute('DELETE FROM members WHERE trip_id = ?', (trip_id,))
+        conn.execute('DELETE FROM trips WHERE id = ?', (trip_id,))
+    return jsonify(ok=True)
+
+@app.patch('/api/trips/<trip_id>/permissions')
+def update_trip_permissions(trip_id):
+    user = _current_user()
+    if not user:
+        return jsonify(error='Not authenticated'), 401
+    data = request.json or {}
+    with get_db() as conn:
+        trip = conn.execute('SELECT * FROM trips WHERE id = ?', (trip_id,)).fetchone()
+        if not trip:
+            return jsonify(error='Trip not found'), 404
+        if trip['owner_id'] != user['id']:
+            return jsonify(error='Only the trip creator can change permissions'), 403
+        members_can_add = 1 if data.get('members_can_add') else 0
+        conn.execute('UPDATE trips SET members_can_add = ? WHERE id = ?', (members_can_add, trip_id))
+    return jsonify(ok=True, members_can_add=members_can_add)
+
 @app.get('/api/trips/<trip_id>')
 def get_trip(trip_id):
     with get_db() as conn:
@@ -758,8 +793,13 @@ def add_expense(trip_id):
     if not name or not total_amount:
         return jsonify(error='Name and amount required'), 400
     with get_db() as conn:
-        if not conn.execute('SELECT id FROM trips WHERE id = ?', (trip_id,)).fetchone():
+        trip = conn.execute('SELECT * FROM trips WHERE id = ?', (trip_id,)).fetchone()
+        if not trip:
             return jsonify(error='Trip not found'), 404
+        # Permission check: only owner can add unless members_can_add is enabled
+        user = _current_user()
+        if user and trip.get('owner_id') and trip['owner_id'] != user['id'] and not trip.get('members_can_add'):
+            return jsonify(error='Only the trip creator can add expenses. Ask them to enable member contributions in trip settings.'), 403
         exp_id = str(uuid.uuid4())
         conn.execute('INSERT INTO expenses (id, trip_id, name, total_amount, paid_by) VALUES (?,?,?,?,?)',
                      (exp_id, trip_id, name, float(total_amount), data.get('paid_by')))
