@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "TripSplit",
+      "name": "FundJet",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["server.py"],
       "port": 3000

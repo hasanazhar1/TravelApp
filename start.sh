@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────
-#  TripSplit — start script
+#  FundJet — start script
 #  Usage:
 #    ./start.sh                  (local only)
 #    ./start.sh --share          (start + open tunnel for friends)
@@ -32,7 +32,7 @@ lsof -ti:3000 | xargs kill -9 2>/dev/null
 sleep 0.5
 
 echo ""
-echo "🌍 Starting TripSplit..."
+echo "🌍 Starting FundJet..."
 python3 server.py &
 SERVER_PID=$!
 sleep 1.5

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TripSplit — Group Travel Budget</title>
+  <title>FundJet — Group Travel Budget</title>
   <style>
     @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Light.otf') format('opentype'); font-weight: 300; font-style: normal; }
     @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; }
@@ -171,6 +171,82 @@
       opacity: 0;
     }
 
+    /* ── EMAIL GHOST AUTOCOMPLETE ── */
+    .email-ghost-wrap {
+      position: relative;
+    }
+    .email-ghost-wrap input {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+    }
+    .email-ghost {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: #bbb;
+      white-space: nowrap;
+      overflow: hidden;
+      border: 1px solid transparent;
+    }
+
+    /* ── PASSWORD REQUIREMENTS ── */
+    .pw-reqs {
+      margin-top: 0.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .pw-req {
+      font-size: 0.75rem;
+      color: #999;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.2s ease;
+    }
+    .pw-req.met { color: var(--green); }
+    .pw-dot { font-size: 0.7rem; }
+
+    /* ── TRIP COUNTDOWN HERO ── */
+    .trip-countdown-hero {
+      text-align: center;
+      padding: 1.5rem 0 1.8rem;
+    }
+    .tch-dest {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: 0.01em;
+    }
+    .tch-num {
+      font-size: 15rem;
+      font-weight: 200;
+      line-height: 0.9;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+    }
+    .tch-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      opacity: 0.7;
+    }
+
+    /* Fade-in-from-top for trips screen elements */
+    @keyframes fadeDownIn {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-down { animation: fadeDownIn 0.45s ease-out both; }
+
     .auth-error {
       color: var(--red);
       font-size: 0.82rem;
@@ -255,6 +331,29 @@
       gap: 0.75rem;
     }
 
+    /* ── JOIN TRIP PREVIEW ── */
+    .join-preview {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      animation: fadeDownIn 0.35s ease both;
+    }
+    .join-preview-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .join-preview-meta {
+      font-size: 0.82rem;
+      color: var(--text2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.8rem;
+    }
+
     btn, .btn {
       display: inline-block;
     }
@@ -315,7 +414,8 @@
     .topbar {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
+      padding: 1rem calc((100% - 1200px) / 2 + 1.5rem);
+      margin-top: 80px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -370,11 +470,13 @@
     .copy-btn:hover { opacity: 0.7; }
 
     .main {
-      padding: 2rem;
+      padding: 2rem 1.5rem;
       display: grid;
       grid-template-columns: 280px 1fr;
       gap: 2rem;
       align-items: start;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     @media (max-width: 768px) {
@@ -420,6 +522,27 @@
     }
 
     .member-row:last-child { border-bottom: none; }
+
+    .member-remove-btn {
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s, color 0.15s;
+    }
+    .member-row:hover .member-remove-btn { opacity: 1; }
+    .member-remove-btn:hover {
+      background: rgba(220,38,38,0.1);
+      color: #dc2626;
+    }
 
     .member-info {
       display: flex;
@@ -469,6 +592,10 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 0.2rem;
+      background: var(--surface);
+      border: none;
+      border-radius: 24px;
+      padding: 1.2rem 1.4rem;
     }
 
     .stat-header-row {
@@ -515,11 +642,25 @@
     }
 
     .stat-total-value {
-      font-size: 2.8rem;
+      font-size: 3.4rem;
       font-weight: 400;
       color: var(--text);
       line-height: 1.1;
       letter-spacing: -0.02em;
+      display: flex;
+      justify-content: center;
+    }
+
+    .tick-digit {
+      display: inline-block;
+      overflow: hidden;
+      height: 1.15em;
+      line-height: 1.15em;
+      vertical-align: top;
+    }
+    .tick-digit-inner {
+      display: block;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .stat-owed-sub {
@@ -854,11 +995,34 @@
 
     .expense-title { font-weight: 400; font-size: 1rem; }
 
+    .expense-amount-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.1rem;
+      flex-shrink: 0;
+    }
     .expense-amount {
-      font-size: 1.1rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: var(--text);
       white-space: nowrap;
+      line-height: 1.1;
+    }
+    @keyframes amountPop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.18); color: var(--accent); }
+      100% { transform: scale(1); }
+    }
+    .expense-amount.amt-pop {
+      animation: amountPop 0.35s ease;
+    }
+    .expense-amount-label {
+      font-size: 0.7rem;
+      color: var(--text2);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .expense-meta {
@@ -907,7 +1071,92 @@
     .expense-actions {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+    .expense-delete-x {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 1rem;
+      padding: 0.15rem 0.3rem;
+      line-height: 1;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      opacity: 0;
+    }
+    .expense-card:hover .expense-delete-x { opacity: 1; }
+    .expense-delete-x:hover { color: var(--red); background: #fee2e2; }
+
+    /* ── GRID VIEW ── */
+    .expenses-grid-mode #flights-list,
+    .expenses-grid-mode #expenses-list {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+    .expenses-grid-mode .expense-section-label {
+      grid-column: 1 / -1;
+    }
+    .expenses-grid-mode .expense-card {
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .expenses-grid-mode .expense-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.4rem;
+      padding: 0.9rem 1rem;
+    }
+    .expenses-grid-mode .expense-title {
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .expenses-grid-mode .expense-amount-wrap {
+      align-items: center;
+      margin: 0.3rem 0;
+    }
+    .expenses-grid-mode .expense-amount {
+      font-size: 1.6rem;
+    }
+    .expenses-grid-mode .expense-actions {
+      align-items: center;
+    }
+    .expenses-grid-mode .expense-meta {
+      display: none;
+    }
+    .expenses-grid-mode .splits-grid {
+      border-top: 1px solid var(--border);
+      padding-top: 0.5rem;
+      margin-top: auto;
+    }
+    .expenses-grid-mode .expense-delete-x {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+    }
+    .expenses-grid-mode .expense-card {
+      position: relative;
+    }
+    .expenses-grid-mode .expense-card .tag {
+      font-size: 0.65rem;
+    }
+    .expenses-grid-mode .expense-card .btn-sm {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.35rem;
+    }
+    .expenses-grid-mode .split-chip {
+      padding: 0.2rem 0.4rem;
+    }
+    .expenses-grid-mode .split-name {
+      font-size: 0.75rem;
+    }
+    .expenses-grid-mode .split-amount {
+      font-size: 0.75rem;
     }
 
     /* ── TICKETMASTER ── */
@@ -917,7 +1166,7 @@
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.6);
-      z-index: 200;
+      z-index: 10000;
       align-items: center;
       justify-content: center;
       padding: 1rem;
@@ -1031,16 +1280,62 @@
       padding: 0.1rem 0.3rem;
     }
 
+    /* ── FULL-SCREEN OVERLAY (flights, lodging) ── */
+    .screen-overlay {
+      display: none;
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 8000;
+      background: var(--bg);
+      overflow-y: auto;
+      animation: screenSlideUp 0.3s ease both;
+    }
+    .screen-overlay.open { display: block; }
+    @keyframes screenSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .screen-overlay-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .screen-overlay-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .screen-back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 1.1rem;
+      padding: 0.4rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .screen-back-btn:hover { background: var(--surface2); color: var(--text); }
+    .screen-overlay-header h2 { margin: 0; font-size: 1.3rem; }
+
     /* ── MODAL ── */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.7);
-      z-index: 100;
-      align-items: center;
+      z-index: 10000;
+      align-items: flex-start;
       justify-content: center;
       padding: 1rem;
+      padding-top: 8vh;
     }
 
     .modal-overlay.open { display: flex; }
@@ -1052,7 +1347,7 @@
       padding: 2rem;
       width: 100%;
       max-width: 520px;
-      max-height: 90vh;
+      max-height: 85vh;
       overflow-y: auto;
       box-shadow: var(--shadow-lg);
     }
@@ -1089,33 +1384,70 @@
 
     .exp-tab-row {
       display: flex;
-      gap: 0;
+      gap: 0.6rem;
       margin-bottom: 0.75rem;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border);
     }
     .exp-tab {
       flex: 1;
-      padding: 0.5rem 0;
-      border: none;
-      background: #f5f5f5;
+      padding: 0.55rem 0;
+      border: 1px solid var(--border);
+      background: #fff;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 400;
       color: var(--text2);
       cursor: pointer;
-      transition: background 0.18s ease, color 0.18s ease;
+      border-radius: 14px;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
     }
-    .exp-tab:first-child { border-right: 1px solid var(--border); }
     .exp-tab.active {
-      background: var(--accent);
-      color: #fff;
+      background: #fff;
+      color: var(--text2);
+      border-color: var(--accent);
     }
     .exp-tab:not(.active):hover {
-      background: #eee;
+      background: #f5f5f5;
+      border-color: #ccc;
+    }
+    .pp-paid-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .pp-paid-item:hover { background: #f5f5f5; }
+    .pp-paid-item input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .pp-paid-item .avatar { width: 24px; height: 24px; font-size: 0.7rem; }
+    .pp-paid-item .pp-name { font-weight: 600; font-size: 0.88rem; color: var(--text); }
+
+    .exp-panels-wrap {
+      position: relative;
     }
     .exp-panel {
-      transition: opacity 0.22s ease;
+      transition: opacity 0.25s ease;
+    }
+    .exp-panel-hidden {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .exp-section-anim {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.25s ease;
+    }
+    .exp-section-anim.collapsed {
+      max-height: 0 !important;
+      opacity: 0;
+      margin: 0;
+      padding: 0;
     }
 
     .split-row {
@@ -1625,19 +1957,149 @@
     .airport-clear.visible { display: block; }
 
     /* ── MULTI-LEG FLIGHT ROWS ── */
-    .flight-leg-row {
-      display: grid;
-      grid-template-columns: 68px 1fr 1fr 1fr 68px 28px;
-      gap: 0.65rem;
-      align-items: end;
-      margin-bottom: 0.65rem;
-      background: #f7f7f7;
-      border-radius: 14px;
-      padding: 0.85rem 1rem;
-      box-shadow: var(--shadow-xs);
+    /* ── FLIGHT TRIP TYPE TOGGLE ── */
+    .flight-type-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1rem;
     }
+    .flight-type-btn {
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text2);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.18s;
+    }
+    .flight-type-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      border-radius: 2px;
+      background: #d1d0ce;
+      transition: background 0.18s;
+    }
+    .flight-type-btn.active { color: var(--accent); font-weight: 600; }
+    .flight-type-btn.active::after { background: var(--accent); }
+
+    /* ── PASSENGER PICKER ── */
+    .pax-picker {
+      position: relative;
+    }
+    .pax-btn {
+      width: 100%;
+      background: #fff;
+      border: 1px solid #d1d0ce;
+      border-radius: 8px;
+      padding: 0 0.7rem;
+      height: 38px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.3rem;
+    }
+    .pax-btn::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid var(--text2);
+      border-bottom: 2px solid var(--text2);
+      transform: rotate(45deg);
+      margin-top: -3px;
+      flex-shrink: 0;
+    }
+    .pax-drop {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      min-width: 200px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+      z-index: 200;
+      padding: 0.35rem 0;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .pax-drop.open { display: block; }
+    .pax-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.45rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.12s;
+    }
+    .pax-drop-item:hover { background: #f5f5f5; }
+    .pax-drop-item input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .pax-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .pax-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .pax-drop-actions {
+      display: flex;
+      border-top: 1px solid var(--border);
+      padding: 0.35rem 0.75rem 0.2rem;
+      margin-top: 0.2rem;
+    }
+    .pax-add-all {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0.2rem 0;
+    }
+    .pax-add-all:hover { opacity: 0.7; }
+
+    .flight-leg-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: flex-end;
+      margin-bottom: 0.65rem;
+      padding: 0.5rem 0;
+    }
+    .flight-leg-row .form-group { flex: 1; min-width: 140px; }
+    .flight-leg-row .form-group.pax-col { flex: 0 0 150px; }
+    .flight-leg-row .form-group.search-col { flex: 0 0 auto; }
     @media (max-width: 800px) {
-      .flight-leg-row { grid-template-columns: 1fr 1fr 1fr; }
+      .flight-leg-row .form-group { min-width: 120px; }
       .leg-label, .leg-remove-btn { display: none; }
     }
 
@@ -1685,12 +2147,11 @@
     }
     .chip-clear:hover { color: var(--red); }
     .leg-label {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--text2);
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      padding-bottom: 0.45rem;
       white-space: nowrap;
     }
     .leg-remove-btn {
@@ -1746,7 +2207,7 @@
     .dp-popup {
       display: none;
       position: fixed;
-      z-index: 10000;
+      z-index: 30000;
       background: #fff;
       border: 1px solid var(--border);
       border-radius: 20px;
@@ -2188,6 +2649,9 @@
     }
     #dest-drop     { right: 48px; }   /* leave room for dice btn */
     #ob-dest-drop  { z-index: 30000; }
+    #lodge-dest-drop {
+      z-index: 100;
+    }
     .dest-drop.open, #dest-drop.open, #ob-dest-drop.open, #lodge-dest-drop.open { display: block; }
 
     .dest-option {
@@ -2261,27 +2725,55 @@
     }
     .dice-btn.rolling { animation: diceRoll 0.7s ease-in-out; }
 
-    /* ── DOCK ── */
+    /* ── NAVBAR ── */
     #dock {
       display: none;
       position: fixed;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
       z-index: 9000;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
     }
 
     .dock-panel {
       display: flex;
-      align-items: flex-end;
-      gap: 14px;
-      background: rgba(255,255,255,0.82);
+      align-items: center;
+      height: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      gap: 0;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .nav-logo img { width: 30px; height: 30px; border-radius: 6px; }
+    .nav-logo span { font-weight: 800; font-size: 1.05rem; color: #111; letter-spacing: -0.02em; }
+
+    .dock-spacer { flex: 1; }
+
+    /* Floating dock buttons (top-right, next to account) */
+    .dock-nav-items {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      background: rgba(255,255,255,0.85);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border: 1px solid rgba(0,0,0,0.09);
-      border-radius: 18px;
-      padding: 10px 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+      border-radius: 14px;
+      padding: 6px 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+      margin-right: 0.75rem;
     }
 
     .dock-item {
@@ -2289,9 +2781,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       background: transparent;
       cursor: pointer;
       flex-shrink: 0;
@@ -2317,11 +2809,13 @@
     }
     .dock-item.active svg { color: var(--accent); stroke: var(--accent); }
 
+    .dock-item-label { display: none; }
+
     .dock-tooltip {
       position: absolute;
-      bottom: calc(100% + 10px);
+      top: calc(100% + 8px);
       left: 50%;
-      transform: translateX(-50%) translateY(4px);
+      transform: translateX(-50%) translateY(-4px);
       background: #fff;
       border: 1px solid var(--border);
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -2337,20 +2831,64 @@
       font-family: inherit;
       letter-spacing: 0.01em;
     }
-
     .dock-item:hover .dock-tooltip {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
 
-    .dock-sep {
-      width: 1px;
-      height: 28px;
-      background: var(--border);
+    .nav-account {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 8px;
+      transition: background 0.15s ease;
       flex-shrink: 0;
-      margin: 0 2px;
-      align-self: center;
     }
+    .nav-account:hover { background: #f5f5f5; }
+    .nav-account .avatar-sm {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 0.72rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .nav-account-email {
+      font-size: 0.82rem;
+      color: #555;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .nav-account-drop {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+      min-width: 140px;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .nav-account-drop.open { display: block; }
+    .nav-account-drop button {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 0.6rem 1rem;
+      text-align: left;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #333;
+    }
+    .nav-account-drop button:hover { background: #f5f5f5; }
 
     /* ── ONBOARDING ── */
     #onboarding {
@@ -2686,6 +3224,7 @@
       max-width: 900px;
       margin: 0 auto;
       padding: 2rem;
+      padding-top: 96px;
     }
 
     .trips-screen-header {
@@ -2899,17 +3438,20 @@
     }
 
     .trips-collapse-btn {
-      background: none;
+      background: #fff;
       border: none;
       color: var(--accent);
       font-size: 0.92rem;
       font-weight: 600;
       cursor: pointer;
-      padding: 0.4rem 0;
+      padding: 0.6rem 0;
       margin-bottom: 0.6rem;
       display: flex;
       align-items: center;
       gap: 0.55rem;
+      position: sticky;
+      top: 80px;
+      z-index: 10;
     }
     .trips-collapse-btn:hover { opacity: 0.8; }
     .trips-chevron {
@@ -2938,7 +3480,10 @@
     /* ── MAP SCREEN ── */
     #screen-map {
       position: fixed;
-      inset: 0;
+      top: 80px;
+      left: 0;
+      right: 0;
+      bottom: 0;
       z-index: 10;
       min-height: unset;
     }
@@ -3093,21 +3638,35 @@
   </div>
 </div>
 
-<!-- DOCK (visible on all post-auth screens) -->
+<!-- NAVBAR (visible on all post-auth screens) -->
 <div id="dock">
   <div class="dock-panel" id="dock-panel">
-    <button class="dock-item active" id="dock-dashboard" onclick="showScreen('dashboard')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <div class="dock-tooltip">Dashboard</div>
-    </button>
-    <button class="dock-item" id="dock-trips" onclick="showScreen('trips')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-      <div class="dock-tooltip">Trips</div>
-    </button>
-    <button class="dock-item" id="dock-map" onclick="showScreen('map')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-      <div class="dock-tooltip">Map</div>
-    </button>
+    <div class="nav-logo" onclick="showScreen('trips')">
+      <img src="/logoblue.jpg" alt="TS" />
+      <span>FundJet</span>
+    </div>
+    <div class="dock-spacer"></div>
+    <div class="dock-nav-items" id="dock-nav-items">
+      <button class="dock-item active" id="dock-dashboard" onclick="showScreen('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <div class="dock-tooltip">Dashboard</div>
+      </button>
+      <button class="dock-item" id="dock-trips" onclick="showScreen('trips')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+        <div class="dock-tooltip">Trips</div>
+      </button>
+      <button class="dock-item" id="dock-map" onclick="showScreen('map')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        <div class="dock-tooltip">Map</div>
+      </button>
+    </div>
+    <div class="nav-account" id="nav-account" onclick="toggleNavAccountDrop(event)">
+      <div class="avatar-sm" id="nav-avatar">?</div>
+      <span class="nav-account-email" id="nav-email"></span>
+      <div class="nav-account-drop" id="nav-account-drop">
+        <button onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3118,8 +3677,8 @@
     <div class="auth-card">
       <!-- Left brand panel -->
       <div class="auth-card-brand">
-        <img src="/logoblue.jpg" alt="TripSplit" />
-        <h2>TripSplit</h2>
+        <img src="/logoblue.jpg" alt="FundJet" />
+        <h2>FundJet</h2>
       </div>
       <!-- Right form panel -->
       <div class="auth-card-form">
@@ -3129,10 +3688,20 @@
         </div>
         <div class="auth-form-body" id="auth-form-body">
           <div class="input-group">
-            <input type="email" id="auth-email" placeholder="Email address" autocomplete="email"
-                   onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()" />
-            <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password"
-                   onkeydown="if(event.key==='Enter')submitAuth()" />
+            <div class="email-ghost-wrap">
+              <input type="email" id="auth-email" placeholder="Email address" autocomplete="off"
+                     oninput="updateEmailGhost()" onkeydown="handleEmailKey(event)" />
+              <span class="email-ghost" id="email-ghost"></span>
+            </div>
+            <div style="position:relative">
+              <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password"
+                     onkeydown="if(event.key==='Enter')submitAuth()" oninput="checkPasswordReqs()" />
+              <div class="pw-reqs" id="pw-reqs" style="display:none">
+                <div class="pw-req" id="pw-req-len"><span class="pw-dot">○</span> At least 8 characters</div>
+                <div class="pw-req" id="pw-req-upper"><span class="pw-dot">○</span> One uppercase letter</div>
+                <div class="pw-req" id="pw-req-num"><span class="pw-dot">○</span> One number</div>
+              </div>
+            </div>
             <div id="auth-error" class="auth-error"></div>
             <button class="btn-primary" id="auth-submit" onclick="submitAuth()"><span id="auth-submit-text">Sign In</span></button>
           </div>
@@ -3147,13 +3716,6 @@
   <div class="trips-screen-inner">
     <div class="trips-screen-header">
       <h1>My Trips</h1>
-      <div class="user-pill" id="user-pill" onclick="toggleUserPillDrop(event)">
-        <div class="avatar-sm" id="trips-avatar">?</div>
-        <span id="trips-email-label"></span>
-        <div class="user-pill-drop" id="user-pill-drop">
-          <button onclick="signOut()">Sign Out</button>
-        </div>
-      </div>
     </div>
 
     <!-- Create & Join -->
@@ -3184,12 +3746,19 @@
       </div>
       <div class="card" style="padding:1.5rem">
         <h2 style="margin-bottom:1rem">Join Existing Trip</h2>
-        <div class="input-group">
-          <input type="text" id="join-trip-id" placeholder="Trip code" />
-          <button class="btn-primary" onclick="joinTrip()">Join Trip</button>
+        <div class="input-group" style="flex-wrap:wrap">
+          <input type="text" id="join-trip-id" placeholder="Trip code" oninput="onJoinCodeInput()" />
+          <div id="join-preview" class="join-preview" style="display:none">
+            <div class="join-preview-name" id="join-preview-name"></div>
+            <div class="join-preview-meta" id="join-preview-meta"></div>
+          </div>
+          <button class="btn-primary" id="join-trip-btn" onclick="joinTrip()">Join Trip</button>
         </div>
       </div>
     </div>
+
+    <!-- Countdown hero for next upcoming trip -->
+    <div class="trip-countdown-hero" id="trip-countdown-hero" style="display:none"></div>
 
     <!-- Trip banners -->
     <div class="upcoming-banners" id="upcoming-banners" style="display:none"></div>
@@ -3289,6 +3858,9 @@
           <button class="btn-outline-accent btn-sm" style="border-top-left-radius:20px;border-bottom-left-radius:20px;padding-left:9px" onclick="openFlightSearch()"><img src="/download.png" width="18" height="18" style="display:block;flex-shrink:0"> Search Flights</button>
           <button class="btn-outline-accent btn-sm" style="padding-left:9px" onclick="openLodging()"><img src="/download-1.png" width="18" height="18" style="display:block;flex-shrink:0;align-self:flex-end"> Find Lodging</button>
           <button class="btn-primary btn-sm" onclick="openAddExpense()">+ Add Expense</button>
+          <button class="btn-sm" id="view-toggle-btn" onclick="toggleExpenseView()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.5rem;cursor:pointer;display:flex;align-items:center" title="Toggle view">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </button>
         </div>
       </div>
 
@@ -3317,7 +3889,7 @@
     <div class="form-group">
       <label>Expense Name</label>
       <div style="position:relative;display:flex;align-items:center">
-        <input type="text" id="exp-name" placeholder="Flight Tickets, Hotel, Dinner..." style="width:100%;padding-right:2.6rem" />
+        <input type="text" id="exp-name" placeholder="" style="width:100%;padding-right:2.6rem;font-weight:700" />
         <!-- Combined service button -->
         <div style="position:absolute;right:8px;display:flex;align-items:center">
           <button onclick="toggleServiceDrop(event)" type="button" title="Search services" style="position:relative;width:36px;height:22px;background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center">
@@ -3343,23 +3915,31 @@
     </div>
 
     <div class="form-group">
-      <label>Total Amount ($)</label>
-      <input type="number" id="exp-amount" placeholder="0.00" min="0" step="0.01" oninput="recalcSplits()" />
+      <div class="exp-tab-row">
+        <button class="exp-tab active" id="exp-amt-tab-total" onclick="switchAmtMode('total')" style="display:flex;align-items:center;justify-content:center;gap:0.4rem"><img src="/person.png" width="16" height="16" style="opacity:0.85"> Total Amount</button>
+        <button class="exp-tab" id="exp-amt-tab-pp" onclick="switchAmtMode('perPerson')" style="display:flex;align-items:center;justify-content:center;gap:0.4rem"><img src="/people.png" width="16" height="16" style="opacity:0.85"> Individual Cost</button>
+      </div>
+      <div style="position:relative">
+        <label id="exp-amount-label" style="font-size:0.82rem;color:var(--text2);margin-bottom:0.25rem;display:block">Total Amount ($)</label>
+        <input type="number" id="exp-amount" placeholder="0.00" min="0" step="0.01" oninput="recalcSplits()" />
+      </div>
     </div>
 
-    <div class="form-group">
-      <div class="exp-tab-row">
-        <button class="exp-tab active" id="exp-tab-paid" onclick="switchExpTab('paid')">Paid By</button>
-        <button class="exp-tab" id="exp-tab-split" onclick="switchExpTab('split')">Split By</button>
-      </div>
-      <div id="exp-panel-paid" class="exp-panel">
-        <select id="exp-paid-by">
-          <option value="">-- Select who paid --</option>
-        </select>
-      </div>
-      <div id="exp-panel-split" class="exp-panel" style="display:none;opacity:0">
-        <div class="splits-editor" id="splits-editor"></div>
-      </div>
+    <div class="form-group exp-section-anim" id="exp-total-paid-section" style="max-height:200px">
+      <label style="font-size:0.82rem;color:var(--text2);margin-bottom:0.25rem;display:block">Paid By</label>
+      <select id="exp-paid-by">
+        <option value="">-- Select who paid --</option>
+      </select>
+    </div>
+
+    <div class="form-group exp-section-anim collapsed" id="exp-pp-paid-section">
+      <label style="font-size:0.82rem;color:var(--text2);margin-bottom:0.25rem;display:block">Who has paid?</label>
+      <div id="pp-paid-list" style="display:flex;flex-direction:column;gap:0.3rem"></div>
+    </div>
+
+    <div class="form-group exp-section-anim collapsed" id="exp-split-section">
+      <label style="font-size:0.82rem;color:var(--text2);margin-bottom:0.25rem;display:block">Split By</label>
+      <div class="splits-editor" id="splits-editor"></div>
     </div>
 
     <div class="modal-actions">
@@ -3397,23 +3977,28 @@
   </div>
 </div>
 
-<!-- FLIGHT SEARCH MODAL -->
-<div class="modal-overlay" id="flight-modal">
-  <div class="modal modal-wide" style="max-width:1140px;width:95vw">
-    <h2>Search Flights</h2>
+<!-- FLIGHT SEARCH SCREEN -->
+<div class="screen-overlay" id="flight-modal">
+  <div class="screen-overlay-inner">
+    <div class="screen-overlay-header">
+      <button class="screen-back-btn" onclick="closeFlightModal()" title="Back to dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h2>Search Flights</h2>
+    </div>
+
+    <div class="flight-type-toggle" id="flight-type-toggle">
+      <button class="flight-type-btn active" id="ft-multi" onclick="setFlightType('multi')">Multi-city</button>
+      <button class="flight-type-btn" id="ft-oneway" onclick="setFlightType('oneway')">One way</button>
+    </div>
 
     <div id="flight-legs-container"></div>
-    <div class="flight-legs-footer">
-      <button class="add-leg-btn" onclick="addFlightLeg()">+ Add flight</button>
-      <button class="btn-primary" style="margin-left:auto;white-space:nowrap" onclick="searchAllFlights()">Search</button>
+    <div class="flight-legs-footer" id="flight-legs-footer">
+      <button class="add-leg-btn" id="add-leg-btn" onclick="addFlightLeg()">+ Add flight</button>
     </div>
 
     <div id="flight-added-notif"><div class="flight-added-pill" id="flight-added-pill">✓ Flight added</div></div>
     <div id="flight-results"></div>
-
-    <div style="margin-top:1.25rem">
-      <button class="btn-secondary" onclick="closeFlightModal()">Close</button>
-    </div>
   </div>
 </div>
 
@@ -3431,10 +4016,15 @@
 <!-- global airport dropdown — attached to body so it overlaps everything -->
 <div id="airport-global-drop"></div>
 
-<!-- LODGING MODAL -->
-<div class="modal-overlay" id="lodging-modal">
-  <div class="modal modal-wide" style="max-width:900px">
-    <h2>Find Lodging</h2>
+<!-- LODGING SCREEN -->
+<div class="screen-overlay" id="lodging-modal">
+  <div class="screen-overlay-inner">
+    <div class="screen-overlay-header">
+      <button class="screen-back-btn" onclick="closeLodging()" title="Back to dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h2>Find Lodging</h2>
+    </div>
 
     <div id="lodging-search-section">
       <div class="lodging-search-bar">
@@ -3490,14 +4080,25 @@
         <div id="lodging-layout-area"></div>
       </div>
     </div>
-
-    <div style="margin-top:1.25rem">
-      <button class="btn-secondary" onclick="closeLodging()">Close</button>
-    </div>
   </div>
 </div>
 
 <!-- CONFIRM DIALOG -->
+<!-- EDIT FLIGHT PASSENGERS MODAL -->
+<div class="modal-overlay" id="edit-pax-modal">
+  <div class="modal" style="max-width:400px">
+    <h2 style="font-size:1.1rem;margin-bottom:1rem">Edit Passengers</h2>
+    <div id="edit-pax-list" style="display:flex;flex-direction:column;gap:0.25rem"></div>
+    <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+      <button class="pax-add-all" type="button" onclick="editPaxSelectAll()" style="font-size:0.82rem">Select all</button>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
+      <button class="btn-secondary" style="flex:1" onclick="document.getElementById('edit-pax-modal').classList.remove('open')">Cancel</button>
+      <button class="btn-primary" style="flex:1" onclick="saveEditFlightPax()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal" style="max-width:380px;text-align:center">
     <div id="confirm-title" style="font-size:1.05rem;font-weight:700;margin-bottom:0.5rem"></div>
@@ -3505,6 +4106,18 @@
     <div style="display:flex;gap:0.75rem">
       <button class="btn-secondary" style="flex:1" id="confirm-cancel">Cancel</button>
       <button class="btn-danger" style="flex:1;padding:0.75rem" id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- IN-APP CONFIRM (non-destructive) -->
+<div class="modal-overlay" id="app-confirm-modal">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div id="app-confirm-title" style="font-size:1.05rem;font-weight:700;margin-bottom:0.5rem"></div>
+    <div id="app-confirm-body" style="font-size:0.9rem;color:var(--text2);margin-bottom:1.5rem"></div>
+    <div style="display:flex;gap:0.75rem">
+      <button class="btn-secondary" style="flex:1" id="app-confirm-cancel">No thanks</button>
+      <button class="btn-primary" style="flex:1;padding:0.75rem" id="app-confirm-ok">Update</button>
     </div>
   </div>
 </div>
@@ -3565,21 +4178,17 @@
     return svg.replace('<svg ', `<svg width="${size}" height="${size}" style="display:inline-block;vertical-align:middle;flex-shrink:0" `);
   }
 
-  // ── DOCK (ReactBits magnification) ──
-  let _dockInited = false;
-  function initDock() {
-    if (_dockInited) return;
-    _dockInited = true;
-
-    const panel = document.getElementById('dock-panel');
+  // ── DOCK (magnification, pops down) ──
+  (function initDock() {
+    const panel = document.getElementById('dock-nav-items');
     const items = [...panel.querySelectorAll('.dock-item')];
-    const BASE = 48, MAX = 64, DIST = 120;
+    const BASE = 40, MAX = 56, DIST = 100;
 
     function setSize(el, size) {
       const s = Math.round(size);
-      el.style.width        = s + 'px';
-      el.style.height       = s + 'px';
-      el.style.borderRadius = Math.round(s * 0.17) + 'px';
+      el.style.width  = s + 'px';
+      el.style.height = s + 'px';
+      el.style.borderRadius = Math.round(s * 0.22) + 'px';
     }
 
     items.forEach(el => setSize(el, BASE));
@@ -3606,7 +4215,7 @@
       _centers = null;
       items.forEach(el => setSize(el, BASE));
     });
-  }
+  })();
 
   // ── SCREEN SWITCHER ──
   let _currentScreen = 'trips';
@@ -3637,6 +4246,12 @@
   function showScreen(name) {
     _currentScreen = name;
 
+    // Close flight/lodging overlays when leaving dashboard
+    if (name !== 'dashboard') {
+      document.getElementById('flight-modal').classList.remove('open');
+      document.getElementById('lodging-modal').classList.remove('open');
+    }
+
     // Hide/show screens
     document.getElementById('landing').style.display       = 'none';
     document.getElementById('screen-trips').style.display  = name === 'trips'     ? 'block' : 'none';
@@ -3648,7 +4263,16 @@
       document.getElementById('dock-' + s).classList.toggle('active', s === name);
     });
 
-    if (name === 'trips') { loadTripsScreen(); return; }
+    if (name === 'trips') {
+      // Reset collapse state
+      _tripsActionsOpen = false;
+      const wrap = document.getElementById('trips-actions-wrap');
+      const chevron = document.getElementById('trips-chevron');
+      if (wrap) { wrap.style.display = 'none'; wrap.style.height = ''; wrap.style.opacity = ''; wrap.classList.remove('trips-actions-anim'); }
+      if (chevron) chevron.classList.remove('open');
+      loadTripsScreen();
+      return;
+    }
     if (name === 'map') {
       gateScreen(() => initMap());
       return;
@@ -3667,10 +4291,11 @@
 
   // ── TRIPS SCREEN ──
   async function loadTripsScreen() {
-    const emailEl  = document.getElementById('trips-email-label');
-    const avatarEl = document.getElementById('trips-avatar');
-    if (emailEl)  emailEl.textContent = _authEmail || '';
-    if (avatarEl) avatarEl.textContent = (_authEmail || '?')[0].toUpperCase();
+    // Update navbar account
+    const navEmail  = document.getElementById('nav-email');
+    const navAvatar = document.getElementById('nav-avatar');
+    if (navEmail)  navEmail.textContent = _authEmail || '';
+    if (navAvatar) navAvatar.textContent = (_authEmail || '?')[0].toUpperCase();
 
     const grid = document.getElementById('trips-grid');
     const bannersEl = document.getElementById('upcoming-banners');
@@ -3687,11 +4312,32 @@
 
       if (trips.length === 0) {
         bannersEl.innerHTML = '<div style="color:var(--text2);font-size:0.9rem">No trips yet — create one below!</div>';
+        document.getElementById('trip-countdown-hero').style.display = 'none';
         return;
       }
 
-      // ── All trips as banners ──
-      const todayStr = new Date().toISOString().slice(0, 10);
+      // ── Countdown hero for nearest upcoming trip ──
+      const _now = new Date();
+      const todayStr = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
+      const heroEl = document.getElementById('trip-countdown-hero');
+      const upcoming = trips
+        .filter(t => t.start_date && t.start_date >= todayStr)
+        .sort((a, b) => a.start_date.localeCompare(b.start_date));
+      if (upcoming.length > 0) {
+        const next = upcoming[0];
+        const msUntil = new Date(next.start_date + 'T00:00:00').getTime() - new Date(todayStr + 'T00:00:00').getTime();
+        const daysLeft = Math.round(msUntil / 86400000);
+        const dest = next.destination || next.name;
+        const numText = daysLeft === 0 ? '🎉' : String(daysLeft);
+        const labelText = daysLeft === 0 ? 'today!' : daysLeft === 1 ? 'day' : 'days';
+        heroEl.style.display = '';
+        heroEl.innerHTML = `
+          <div class="tch-dest">${esc(dest)} in</div>
+          <div class="tch-num">${numText}</div>
+          <div class="tch-label">${labelText}</div>`;
+      } else {
+        heroEl.style.display = 'none';
+      }
 
       bannersEl.innerHTML = trips.map(t => {
         const isOwner = t.owner_id === _authUserId;
@@ -3741,6 +4387,23 @@
           ${rightHtml}
         </div>`;
       }).join('');
+
+      // Staggered fade-from-top animation
+      let delay = 0;
+      if (heroEl.style.display !== 'none') {
+        heroEl.classList.remove('fade-down');
+        void heroEl.offsetWidth;
+        heroEl.style.animationDelay = delay + 'ms';
+        heroEl.classList.add('fade-down');
+        delay += 120;
+      }
+      bannersEl.querySelectorAll('.upcoming-banner').forEach(b => {
+        b.classList.remove('fade-down');
+        void b.offsetWidth;
+        b.style.animationDelay = delay + 'ms';
+        b.classList.add('fade-down');
+        delay += 80;
+      });
     } catch {
       grid.style.display = '';
       grid.innerHTML = '<div style="color:var(--red);font-size:0.9rem">Failed to load trips.</div>';
@@ -4117,6 +4780,10 @@
     // Fade in active panel
     const active = document.getElementById('ob-panel-' + step);
     requestAnimationFrame(() => requestAnimationFrame(() => active.classList.add('ob-visible')));
+    // Re-init date picker when step 3 becomes visible (needs layout for positioning)
+    if (step === 3) {
+      requestAnimationFrame(() => initDatePicker('ob-trip-date'));
+    }
   }
 
   let _obMode = 'create'; // 'create' | 'join'
@@ -4137,6 +4804,8 @@
     document.getElementById('ob-join-error').textContent = '';
 
     if (mode === 'join') {
+      // Close any open date picker
+      if (typeof _dpClose === 'function') _dpClose();
       // Measure how far to pull the bottom section up
       const inputGroup = createFields.parentElement;
       const gap = parseFloat(getComputedStyle(inputGroup).gap) || 12;
@@ -4310,9 +4979,10 @@
 
   function obSkip(fromStep) {
     if (fromStep === 3) {
-      // Populate step 4 with no-trip message
+      // Update heading + content for skipped trip creation
+      document.querySelector('#ob-panel-4 h2').textContent = "You're all set! ✈️";
       document.getElementById('ob-invite-content').innerHTML =
-        `<p style="color:var(--text2);font-size:0.88rem;margin-top:0.5rem">You're all set! Head to My Trips to create your first trip and share the code with your group.</p>`;
+        `<p style="color:var(--text2);font-size:0.93rem;margin-top:0.5rem">You can create a trip or join one anytime from the <strong style="color:var(--text)">My Trips</strong> page.</p>`;
     }
     obRenderStep(fromStep + 1);
   }
@@ -4320,11 +4990,12 @@
   function obFinish() {
     localStorage.setItem('ts_onboarded', '1');
     document.getElementById('onboarding').style.display = 'none';
-    if (_obTripId) {
-      loadTrip(_obTripId).then(() => showTripSection());
-    } else {
-      showTripSection();
-    }
+    document.getElementById('dock').style.display = 'block';
+    const navEmail  = document.getElementById('nav-email');
+    const navAvatar = document.getElementById('nav-avatar');
+    if (navEmail)  navEmail.textContent = _authEmail || '';
+    if (navAvatar) navAvatar.textContent = (_authEmail || '?')[0].toUpperCase();
+    showScreen('trips');
   }
 
   // ── AUTH STATE ──
@@ -4365,6 +5036,65 @@
 
   let _authTab = 'signin';
 
+  // ── EMAIL GHOST AUTOCOMPLETE ──
+  const _emailDomains = ['gmail.com','yahoo.com','outlook.com','hotmail.com','icloud.com','aol.com','protonmail.com','mail.com','zoho.com','yandex.com'];
+  let _emailGhostSuggestion = '';
+
+  function updateEmailGhost() {
+    const input = document.getElementById('auth-email');
+    const ghost = document.getElementById('email-ghost');
+    const val = input.value;
+    const atIdx = val.indexOf('@');
+    if (atIdx < 1) { ghost.textContent = ''; _emailGhostSuggestion = ''; return; }
+    const typed = val.slice(atIdx + 1).toLowerCase();
+    const match = _emailDomains.find(d => d.startsWith(typed) && d !== typed);
+    if (match) {
+      _emailGhostSuggestion = val.slice(0, atIdx + 1) + match;
+      // Show the full suggestion as ghost, but make the typed part invisible so only the completion shows
+      const invisible = val;
+      const completion = _emailGhostSuggestion.slice(val.length);
+      ghost.innerHTML = `<span style="visibility:hidden">${esc(invisible)}</span><span>${esc(completion)}</span>`;
+    } else {
+      ghost.textContent = '';
+      _emailGhostSuggestion = '';
+    }
+  }
+
+  function handleEmailKey(e) {
+    if ((e.key === 'Tab' || e.key === 'Enter') && _emailGhostSuggestion) {
+      e.preventDefault();
+      const input = document.getElementById('auth-email');
+      input.value = _emailGhostSuggestion;
+      document.getElementById('email-ghost').textContent = '';
+      _emailGhostSuggestion = '';
+      document.getElementById('auth-password').focus();
+      return;
+    }
+    if (e.key === 'Enter') {
+      document.getElementById('auth-password').focus();
+      e.preventDefault();
+    }
+  }
+
+  // ── PASSWORD REQUIREMENTS ──
+  function checkPasswordReqs() {
+    const pw = document.getElementById('auth-password').value;
+    const reqs = document.getElementById('pw-reqs');
+    // Only show for Create Account tab
+    if (_authTab !== 'signup') { reqs.style.display = 'none'; return; }
+    reqs.style.display = '';
+    const checks = [
+      { id: 'pw-req-len',   met: pw.length >= 8 },
+      { id: 'pw-req-upper', met: /[A-Z]/.test(pw) },
+      { id: 'pw-req-num',   met: /\d/.test(pw) },
+    ];
+    checks.forEach(c => {
+      const el = document.getElementById(c.id);
+      el.classList.toggle('met', c.met);
+      el.querySelector('.pw-dot').textContent = c.met ? '●' : '○';
+    });
+  }
+
   function switchAuthTab(tab) {
     if (_authTab === tab) return;
     _authTab = tab;
@@ -4376,6 +5106,9 @@
       btnText.textContent = tab === 'signin' ? 'Sign In' : 'Create Account';
       document.getElementById('auth-error').textContent = '';
       document.getElementById('auth-password').autocomplete = tab === 'signin' ? 'current-password' : 'new-password';
+      // Show/hide password requirements
+      const pw = document.getElementById('auth-password').value;
+      document.getElementById('pw-reqs').style.display = (tab === 'signup' && pw) ? '' : 'none';
       btnText.classList.remove('fading');
     }, 100);
   }
@@ -4422,18 +5155,18 @@
     }
   }
 
-  function toggleUserPillDrop(e) {
-    const drop = document.getElementById('user-pill-drop');
+  function toggleNavAccountDrop(e) {
+    const drop = document.getElementById('nav-account-drop');
     if (!drop) return;
     drop.classList.toggle('open');
     e.stopPropagation();
   }
 
-  // Close dropdown when clicking outside
+  // Close account dropdown when clicking outside
   document.addEventListener('click', function(e) {
-    const pill = document.getElementById('user-pill');
-    const drop = document.getElementById('user-pill-drop');
-    if (drop && drop.classList.contains('open') && pill && !pill.contains(e.target)) {
+    const acct = document.getElementById('nav-account');
+    const drop = document.getElementById('nav-account-drop');
+    if (drop && drop.classList.contains('open') && acct && !acct.contains(e.target)) {
       drop.classList.remove('open');
     }
   });
@@ -4471,7 +5204,11 @@
 
   function showTripSection() {
     document.getElementById('dock').style.display = 'block';
-    initDock();
+    // Update navbar account
+    const navEmail  = document.getElementById('nav-email');
+    const navAvatar = document.getElementById('nav-avatar');
+    if (navEmail)  navEmail.textContent = _authEmail || '';
+    if (navAvatar) navAvatar.textContent = (_authEmail || '?')[0].toUpperCase();
     // Go to dashboard if a trip is already loaded, otherwise trips list
     showScreen(tripData ? 'dashboard' : 'trips');
   }
@@ -4484,7 +5221,9 @@
       if (res.ok) {
         const data = await res.json();
         _authEmail = data.email;
+        _authUserId = data.id || null;
         localStorage.setItem('ts_email', data.email);
+        if (data.id) localStorage.setItem('ts_user_id', data.id);
         showTripSection();
       } else {
         _clearAuth();
@@ -4533,30 +5272,95 @@
     showScreen('dashboard');
   }
 
+  let _joinPreviewTrip = null; // cached preview data for the trip code
+
+  function onJoinCodeInput() {
+    // Reset preview when the code changes
+    _joinPreviewTrip = null;
+    const preview = document.getElementById('join-preview');
+    if (preview) preview.style.display = 'none';
+    const btn = document.getElementById('join-trip-btn');
+    if (btn) { btn.textContent = 'Join Trip'; btn.style.background = ''; btn.disabled = false; }
+  }
+
   async function joinTrip() {
     const input = document.getElementById('join-trip-id');
-    const btn = input.parentElement.querySelector('.btn-primary');
+    const btn = document.getElementById('join-trip-btn');
+    const preview = document.getElementById('join-preview');
     const id = input.value.trim();
     if (!id) { toast('Please enter a trip code'); return; }
 
-    btn.disabled = true; btn.textContent = 'Joining…';
-    try {
-      // Check if the trip exists first
-      const check = await fetch('/api/trips/' + id, { headers: _authHeaders() });
-      if (!check.ok) {
-        toast('Trip not found — check the code and try again.');
-        btn.style.background = '#7b8fa3';
-        btn.textContent = 'Trip not found';
-        btn.disabled = true;
-        input.addEventListener('input', function reset() {
+    // ── Step 1: Look up trip and show preview (first click) ──
+    if (!_joinPreviewTrip) {
+      btn.disabled = true; btn.textContent = 'Looking up…';
+      try {
+        const check = await fetch('/api/trips/' + id, { headers: _authHeaders() });
+        if (!check.ok) {
+          toast('Trip not found — check the code and try again.');
+          btn.style.background = '#7b8fa3';
+          btn.textContent = 'Trip not found';
+          btn.disabled = true;
+          return;
+        }
+        const trip = await check.json();
+        if (trip.error) {
+          toast('Trip not found — check the code and try again.');
+          btn.style.background = '#7b8fa3';
+          btn.textContent = 'Trip not found';
+          btn.disabled = true;
+          return;
+        }
+
+        // Ensure cached trips are loaded
+        if (!_cachedTrips) {
+          try {
+            const tripsRes = await fetch('/api/trips', { headers: _authHeaders() });
+            if (tripsRes.ok) { const d = await tripsRes.json(); _cachedTrips = d.trips || []; }
+          } catch {}
+        }
+        // Check if user is already in this trip
+        if (_cachedTrips && _cachedTrips.some(t => t.id === id)) {
+          toast('You are already in this trip!');
           btn.style.background = '';
           btn.textContent = 'Join Trip';
           btn.disabled = false;
-          input.removeEventListener('input', reset);
-        });
-        return;
+          return;
+        }
+
+        // Show preview
+        _joinPreviewTrip = trip;
+        const nameEl = document.getElementById('join-preview-name');
+        const metaEl = document.getElementById('join-preview-meta');
+        nameEl.textContent = trip.name || 'Unnamed Trip';
+        const parts = [];
+        if (trip.destination) parts.push('📍 ' + trip.destination);
+        if (trip.members && trip.members.length) parts.push('👥 ' + trip.members.length + ' member' + (trip.members.length !== 1 ? 's' : ''));
+        if (trip.start_date) {
+          const [y, m, d] = trip.start_date.split('-');
+          parts.push('🗓 ' + new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+        }
+        metaEl.textContent = parts.join('  ·  ');
+        preview.style.display = '';
+        // Re-trigger animation
+        preview.style.animation = 'none';
+        preview.offsetHeight;
+        preview.style.animation = '';
+
+        btn.textContent = 'Confirm Join';
+        btn.disabled = false;
+        btn.style.background = '';
+      } catch {
+        toast('Something went wrong. Please try again.');
+        btn.style.background = '';
+        btn.textContent = 'Join Trip';
+        btn.disabled = false;
       }
-      // Trip exists — join it
+      return;
+    }
+
+    // ── Step 2: Actually join (second click — confirm) ──
+    btn.disabled = true; btn.textContent = 'Joining…';
+    try {
       if (_authToken) {
         await fetch(`/api/trips/${id}/join`, {
           method: 'POST',
@@ -4564,6 +5368,9 @@
         }).catch(() => {});
       }
       _userTripCount++;
+      _joinPreviewTrip = null;
+      preview.style.display = 'none';
+      _cachedTrips = null; // force refresh
       await navigateToTrip(id);
     } catch {
       toast('Something went wrong. Please try again.');
@@ -4579,7 +5386,6 @@
     if (ok) {
       history.pushState({}, '', `/trip/${id}`);
       document.getElementById('dock').style.display = 'block';
-      initDock();
       showScreen('dashboard');
     }
   }
@@ -4601,7 +5407,7 @@
     document.getElementById('share-code').textContent = tripData.id;
     // Default view: creator sees Group, members see Me
     const isOwner = tripData.owner_id === _authUserId;
-    setViewMode(isOwner ? 'group' : 'me');
+    setViewMode(isOwner ? 'group' : 'me', true);
     renderMembers();
     renderExpenses();
     renderSummary();
@@ -4635,7 +5441,10 @@
             <div class="avatar" style="background:${m.color}">${m.name[0].toUpperCase()}</div>
             <span class="member-name">${esc(m.name)}</span>
           </div>
-          <span class="member-balance ${cls}">${prefix}${fmt(Math.abs(net))}</span>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="member-balance ${cls}">${prefix}${fmt(Math.abs(net))}</span>
+            <button class="member-remove-btn" onclick="event.stopPropagation();removeMember('${m.id}','${esc(m.name)}')" title="Remove member">&times;</button>
+          </div>
         </div>
       `;
     }).join('');
@@ -4654,6 +5463,27 @@
     return { owed, paid };
   }
 
+  function formatFlightTitle(name) {
+    // Parse: "BOS → LIS (Tap Air Portugal TP 228) · 5/10/2026"
+    const m = name.match(/^([A-Z]{3})\s*→\s*([A-Z]{3})\s*(.*)$/);
+    if (!m) return esc(name);
+    const origin = m[1];
+    const dest = m[2];
+    let rest = m[3].trim();
+    // Extract date after · if present
+    let datePart = '';
+    const dotIdx = rest.lastIndexOf('·');
+    if (dotIdx !== -1) {
+      datePart = rest.slice(dotIdx + 1).trim();
+      rest = rest.slice(0, dotIdx).trim();
+    }
+    // Remove parentheses from airline info
+    rest = rest.replace(/^\(/, '').replace(/\)$/, '').trim();
+    let html = `<strong>${origin}</strong> <span style="color:var(--text2);font-weight:400">to</span> <strong>${dest}</strong>`;
+    if (datePart) html += ` <span style="color:var(--text2);font-weight:400">· ${esc(datePart)}</span>`;
+    return html;
+  }
+
   function expenseCardHTML(exp) {
     const totalPaid = exp.splits.reduce((s, sp) => s + (sp.paid ? sp.amount : 0), 0);
     const pct = exp.total_amount > 0 ? Math.round((totalPaid / exp.total_amount) * 100) : 0;
@@ -4662,27 +5492,28 @@
     const tagClass = allPaid ? 'tag-paid' : nonePaid ? 'tag-unpaid' : 'tag-partial';
     const tagText  = allPaid ? 'All Paid' : nonePaid ? 'Unpaid' : `${pct}% Paid`;
     const paidByMember = tripData.members.find(m => m.id === exp.paid_by);
+    const isFlight = /[A-Z]{3}\s*→\s*[A-Z]{3}/.test(exp.name);
 
     const me = _myMember();
     const meSplit = me ? exp.splits.find(sp => sp.member_id === me.id) : null;
     const meMode  = _viewMode === 'me' && me;
 
-    // In Me mode, show "Your share: $X" badge next to title
-    const myShareBadge = meMode && meSplit
-      ? `<span class="my-share-badge">you: ${fmt(meSplit.amount)}${meSplit.paid ? ' ✓' : ''}</span>`
-      : '';
-
-    // Display amount: in Me mode show my split, else full total
+    // Display amount + label based on view mode
     const displayAmount = meMode && meSplit ? fmt(meSplit.amount) : fmt(exp.total_amount);
+    const amountLabel = meMode ? 'my share' : 'total';
+
+    const editPaxBtn = isFlight
+      ? `<button class="btn-sm" style="background:none;border:1px solid var(--border);color:var(--text2);font-size:0.72rem;border-radius:8px;cursor:pointer;padding:0.2rem 0.5rem" onclick="event.stopPropagation();openEditFlightPax('${exp.id}')">✏️ Passengers</button>`
+      : '';
 
     return `
       <div class="expense-card">
         <div class="expense-header">
-          <div>
+          <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-              <span class="expense-title">${esc(exp.name)}</span>
+              <span class="expense-title">${isFlight ? formatFlightTitle(exp.name) : esc(exp.name)}</span>
               <span class="tag ${tagClass}">${tagText}</span>
-              ${myShareBadge}
+              ${editPaxBtn}
             </div>
             <div class="expense-meta">
               ${paidByMember ? `Paid by <strong>${esc(paidByMember.name)}</strong> · ` : ''}
@@ -4691,8 +5522,11 @@
             </div>
           </div>
           <div class="expense-actions">
-            <span class="expense-amount">${displayAmount}</span>
-            <button class="btn-danger btn-sm" onclick="deleteExpense('${exp.id}')">Delete</button>
+            <div class="expense-amount-wrap">
+              <span class="expense-amount${_animateAmounts ? ' amt-pop' : ''}">${displayAmount}</span>
+              <span class="expense-amount-label">${amountLabel}</span>
+            </div>
+            <button class="expense-delete-x" onclick="deleteExpense('${exp.id}')" title="Delete">✕</button>
           </div>
         </div>
         <div class="splits-grid">
@@ -4758,20 +5592,25 @@
 
     // ── AnimatedList: IntersectionObserver with staggered delays ──
     const cards = expensesList.querySelectorAll('.expense-card');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('al-visible');
-        } else {
-          entry.target.classList.remove('al-visible');
-        }
-      });
-    }, { threshold: 0.15, root: expensesList });
+    if (_skipExpenseAnim) {
+      // No animation on tab switch — show immediately
+      cards.forEach(c => { c.style.opacity = '1'; c.style.transform = 'none'; });
+    } else {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('al-visible');
+          } else {
+            entry.target.classList.remove('al-visible');
+          }
+        });
+      }, { threshold: 0.15, root: expensesList });
 
-    cards.forEach((card, i) => {
-      card.style.animationDelay = `${i * 0.08}s`;
-      observer.observe(card);
-    });
+      cards.forEach((card, i) => {
+        card.style.animationDelay = `${i * 0.08}s`;
+        observer.observe(card);
+      });
+    }
 
     // ── Scroll gradients ──
     const gradTop = document.getElementById('al-grad-top');
@@ -4846,6 +5685,23 @@
 
   // ── VIEW MODE: 'group' (whole trip) | 'me' (my personal share) ──
   let _viewMode = 'group';
+  let _animateAmounts = false;
+  let _skipExpenseAnim = false;
+  let _expenseViewMode = 'list'; // 'list' or 'grid'
+
+  function toggleExpenseView() {
+    _expenseViewMode = _expenseViewMode === 'list' ? 'grid' : 'list';
+    const main = document.querySelector('.main');
+    main.classList.toggle('expenses-grid-mode', _expenseViewMode === 'grid');
+    const btn = document.getElementById('view-toggle-btn');
+    if (_expenseViewMode === 'grid') {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+      btn.title = 'List view';
+    } else {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>';
+      btn.title = 'Grid view';
+    }
+  }
 
   function _myMember() {
     if (!tripData || !tripData.members || !tripData.members.length) return null;
@@ -4877,17 +5733,45 @@
     return null;
   }
 
-  function setViewMode(mode) {
+  function setViewMode(mode, skipRender) {
+    const wasMe = _viewMode === 'me';
     _viewMode = mode;
     document.getElementById('vm-group').classList.toggle('active', mode === 'group');
     document.getElementById('vm-me').classList.toggle('active', mode === 'me');
-    _sumLastPaid = null; // re-animate bar on mode switch
-    renderSummary();
-    renderExpenses();
+    // Don't reset _sumLastPaid — skip bar animation on tab switch
+    if (!skipRender) {
+      _rollSkipAnim = true;
+      _skipExpenseAnim = true;
+      renderSummary();
+      renderExpenses();
+      _rollSkipAnim = false;
+      _skipExpenseAnim = false;
+    }
+
+    // Animate other-member chips back in when switching Me → Group
+    if (mode === 'group' && wasMe) {
+      const others = document.querySelectorAll('.split-chip');
+      const me = _myMember();
+      if (me) {
+        others.forEach(chip => {
+          const nameEl = chip.querySelector('.split-name');
+          if (!nameEl) return;
+          const isMine = nameEl.textContent.trim().toLowerCase() === me.name.trim().toLowerCase();
+          if (!isMine) {
+            chip.classList.add('other');
+          }
+        });
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            others.forEach(chip => chip.classList.remove('other'));
+          });
+        });
+      }
+    }
   }
 
   // Smooth number ticker: animates el's text from its current displayed value → toVal
-  function tickCount(el, toVal, format, duration = 900) {
+  function tickCount(el, toVal, format, duration = 1200) {
     const fromVal = parseFloat(el.dataset.tickVal ?? toVal);
     el.dataset.tickVal = toVal;
     if (Math.abs(toVal - fromVal) < 0.005) { el.textContent = format(toVal); return; }
@@ -4896,12 +5780,71 @@
     const diff  = toVal - fromVal;
     function step(now) {
       const t    = Math.min((now - start) / duration, 1);
-      // power6 ease-out: rockets at the start, crawls to a near-stop at the end
-      const ease = 1 - Math.pow(1 - t, 6);
+      const ease = 1 - Math.pow(1 - t, 10);
       el.textContent = format(fromVal + diff * ease);
       if (t < 1) el._tickRaf = requestAnimationFrame(step);
     }
     el._tickRaf = requestAnimationFrame(step);
+  }
+
+  // Slot-machine digit roller: each character rolls in one after the other
+  let _rollPrevChars = [];
+  let _rollSkipAnim = false;
+  function rollDigits(el, toVal, format) {
+    const newStr = format(toVal);
+    const newChars = newStr.split('');
+    const oldChars = _rollPrevChars;
+    _rollPrevChars = newChars;
+
+    // Build digit columns
+    el.innerHTML = '';
+    const digitChars = '0123456789';
+    const staggerMs = 60; // delay between each digit
+
+    newChars.forEach((ch, i) => {
+      const oldCh = oldChars[i] ?? '';
+      const isDigit = digitChars.includes(ch);
+      const wasDigit = digitChars.includes(oldCh);
+
+      if (_rollSkipAnim || !isDigit || !wasDigit || oldCh === ch) {
+        // Static character ($ , . or unchanged digit)
+        const span = document.createElement('span');
+        span.className = 'tick-digit';
+        span.innerHTML = `<span class="tick-digit-inner">${ch}</span>`;
+        el.appendChild(span);
+        return;
+      }
+
+      // Rolling digit: build a column of 0-9, position to old, animate to new
+      const oldIdx = parseInt(oldCh);
+      const newIdx = parseInt(ch);
+      const wrap = document.createElement('span');
+      wrap.className = 'tick-digit';
+      const inner = document.createElement('span');
+      inner.className = 'tick-digit-inner';
+      inner.style.transition = 'none';
+
+      // Stack all digits 0-9 vertically
+      for (let d = 0; d <= 9; d++) {
+        const line = document.createElement('span');
+        line.style.display = 'block';
+        line.style.height = '1.15em';
+        line.textContent = d;
+        inner.appendChild(line);
+      }
+
+      // Start at old digit position
+      inner.style.transform = `translateY(-${oldIdx * 1.15}em)`;
+      wrap.appendChild(inner);
+      el.appendChild(wrap);
+
+      // Animate to new digit with stagger
+      const delay = i * staggerMs;
+      setTimeout(() => {
+        inner.style.transition = `transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)`;
+        inner.style.transform = `translateY(-${newIdx * 1.15}em)`;
+      }, delay);
+    });
   }
 
   function renderSummary() {
@@ -4950,9 +5893,9 @@
       document.getElementById('stat-total-label').textContent = labelText;
     }
 
-    // Big number — tick smoothly on every change
+    // Big number — digit-by-digit roll on every change
     const totalEl = document.getElementById('stat-total');
-    if (totalEl) tickCount(totalEl, displayOwed, v => fmt(v));
+    if (totalEl) rollDigits(totalEl, displayOwed, v => fmt(v));
 
     // Sub text
     const subEl = document.getElementById('stat-owed-sub');
@@ -4980,7 +5923,12 @@
       const pct = Math.min((displayPaid / displayTotal) * 100, 100);
       divider.style.display = '';
       barWrap.style.display = '';
-      tickCount(lblPaid, displayPaid, v => `${fmt(v)} covered`);
+      if (_rollSkipAnim) {
+        lblPaid.textContent = `${fmt(displayPaid)} covered`;
+        lblPaid.dataset.tickVal = displayPaid;
+      } else {
+        tickCount(lblPaid, displayPaid, v => `${fmt(v)} covered`);
+      }
       if (_sumLastPaid === null) {
         barFill.style.transition = 'none';
         barFill.style.width = '0%';
@@ -5043,23 +5991,38 @@
     if (data.error) { toast(data.error); return; }
 
     input.value = '';
+    _animateAmounts = true;
     await loadTrip(currentTripId);
+    _animateAmounts = false;
     toast(`${name} added to the trip!`);
+  }
+
+  function removeMember(memberId, memberName) {
+    confirmDelete(
+      `Remove ${memberName}?`,
+      'Their expense splits will be removed and totals recalculated.',
+      async () => {
+        const res = await fetch(`/api/trips/${currentTripId}/members/${memberId}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.error) { toast(data.error); return; }
+        _animateAmounts = true;
+        await loadTrip(currentTripId);
+        _animateAmounts = false;
+        toast(`${memberName} removed`);
+      }
+    );
   }
 
   // ── EXPENSES ──
   function _canAddExpenses() {
-    if (!tripData) return false;
-    if (tripData.owner_id === _authUserId) return true;
-    if (tripData.members_can_add) return true;
-    return false;
+    // Server enforces permissions — always allow client-side attempts
+    return !!tripData;
   }
 
+  let _expAmtMode = 'total'; // 'total' or 'perPerson'
+  let _ppPaidSet = new Set(); // members who paid in per-person mode
+
   function openAddExpense() {
-    if (!_canAddExpenses()) {
-      toast('Only the trip creator can add expenses. Ask them to enable member contributions in trip settings.');
-      return;
-    }
     const modal = document.getElementById('expense-modal');
     document.getElementById('exp-name').value = '';
     document.getElementById('exp-amount').value = '';
@@ -5070,38 +6033,60 @@
 
     renderSplitsEditor();
 
-    // Reset to Paid By tab
-    switchExpTab('paid');
-
     const warning = document.getElementById('no-members-warning');
     warning.style.display = tripData.members.length === 0 ? 'block' : 'none';
 
     modal.classList.add('open');
+    // Set max-heights after modal is visible so scrollHeight is accurate
+    requestAnimationFrame(() => switchAmtMode('total'));
     document.getElementById('exp-name').focus();
   }
 
-  function switchExpTab(tab) {
-    const paidTab   = document.getElementById('exp-tab-paid');
-    const splitTab  = document.getElementById('exp-tab-split');
-    const paidPanel = document.getElementById('exp-panel-paid');
-    const splitPanel = document.getElementById('exp-panel-split');
+  function switchAmtMode(mode) {
+    _expAmtMode = mode;
+    document.getElementById('exp-amt-tab-total').classList.toggle('active', mode === 'total');
+    document.getElementById('exp-amt-tab-pp').classList.toggle('active', mode === 'perPerson');
+    document.getElementById('exp-amount-label').textContent = mode === 'total' ? 'Total Amount ($)' : 'Individual Cost ($)';
 
-    if (tab === 'paid') {
-      paidTab.classList.add('active');
-      splitTab.classList.remove('active');
-      paidPanel.style.display = '';
-      paidPanel.style.opacity = '1';
-      splitPanel.style.opacity = '0';
-      setTimeout(() => { splitPanel.style.display = 'none'; }, 220);
+    const totalPaidSec = document.getElementById('exp-total-paid-section');
+    const ppPaidSec = document.getElementById('exp-pp-paid-section');
+    const splitSec = document.getElementById('exp-split-section');
+
+    if (mode === 'total') {
+      // Show: total paid-by + split-by
+      totalPaidSec.classList.remove('collapsed');
+      totalPaidSec.style.maxHeight = totalPaidSec.scrollHeight + 'px';
+      splitSec.classList.remove('collapsed');
+      splitSec.style.maxHeight = splitSec.scrollHeight + 'px';
+      // Hide: per-person paid list
+      ppPaidSec.classList.add('collapsed');
     } else {
-      splitTab.classList.add('active');
-      paidTab.classList.remove('active');
-      splitPanel.style.display = '';
-      requestAnimationFrame(() => { splitPanel.style.opacity = '1'; });
-      paidPanel.style.opacity = '0';
-      setTimeout(() => { paidPanel.style.display = 'none'; }, 220);
-      renderSplitsEditor();
+      // Hide: total paid-by + split-by
+      totalPaidSec.classList.add('collapsed');
+      splitSec.classList.add('collapsed');
+      // Show: per-person paid list
+      _ppPaidSet = new Set();
+      renderPpPaidList();
+      ppPaidSec.classList.remove('collapsed');
+      ppPaidSec.style.maxHeight = ppPaidSec.scrollHeight + 'px';
     }
+  }
+
+  function renderPpPaidList() {
+    const list = document.getElementById('pp-paid-list');
+    list.innerHTML = tripData.members.map(m => `
+      <label class="pp-paid-item">
+        <input type="checkbox" ${_ppPaidSet.has(m.id) ? 'checked' : ''}
+          onchange="togglePpPaid('${m.id}', this.checked)" />
+        <div class="avatar" style="background:${m.color}">${m.name[0].toUpperCase()}</div>
+        <span class="pp-name">${esc(m.name)}</span>
+      </label>
+    `).join('');
+  }
+
+  function togglePpPaid(memberId, checked) {
+    if (checked) _ppPaidSet.add(memberId);
+    else _ppPaidSet.delete(memberId);
   }
 
   function renderSplitsEditor() {
@@ -5126,6 +6111,11 @@
 
   function recalcSplits() {
     renderSplitsEditor();
+    // Update max-height for animation
+    const splitSec = document.getElementById('exp-split-section');
+    if (!splitSec.classList.contains('collapsed')) {
+      splitSec.style.maxHeight = splitSec.scrollHeight + 'px';
+    }
   }
 
   document.getElementById('exp-paid-by').addEventListener('change', () => {
@@ -5142,31 +6132,49 @@
   async function submitExpense() {
     const name = document.getElementById('exp-name').value.trim();
     const amount = parseFloat(document.getElementById('exp-amount').value);
-    const paidBy = document.getElementById('exp-paid-by').value;
 
     if (!name) { toast('Please enter an expense name'); return; }
     if (!amount || amount <= 0) { toast('Please enter a valid amount'); return; }
 
-    const splits = [];
-    document.querySelectorAll('.split-amount-input').forEach(input => {
-      const check = document.querySelector(`.split-paid-check[data-member="${input.dataset.member}"]`);
-      splits.push({
-        member_id: input.dataset.member,
-        amount: parseFloat(input.value) || 0,
-        paid: check ? check.checked : false
+    let totalAmount, splits, paidBy = null;
+
+    if (_expAmtMode === 'perPerson') {
+      // Per person: each member owes `amount`, total = amount × members
+      const members = tripData.members;
+      if (!members.length) { toast('Add members first'); return; }
+      totalAmount = amount * members.length;
+      splits = members.map(m => ({
+        member_id: m.id,
+        amount: amount,
+        paid: _ppPaidSet.has(m.id)
+      }));
+    } else {
+      // Total amount mode: split equally, one person paid
+      totalAmount = amount;
+      paidBy = document.getElementById('exp-paid-by').value || null;
+      splits = [];
+      document.querySelectorAll('.split-amount-input').forEach(input => {
+        const check = document.querySelector(`.split-paid-check[data-member="${input.dataset.member}"]`);
+        splits.push({
+          member_id: input.dataset.member,
+          amount: parseFloat(input.value) || 0,
+          paid: check ? check.checked : false
+        });
       });
-    });
+    }
 
     const res = await fetch(`/api/trips/${currentTripId}/expenses`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ..._authHeaders() },
-      body: JSON.stringify({ name, total_amount: amount, paid_by: paidBy || null, splits })
+      body: JSON.stringify({ name, total_amount: totalAmount, paid_by: paidBy, splits })
     });
     const data = await res.json();
     if (data.error) { toast(data.error); return; }
 
     closeModal();
+    _animateAmounts = true;
     await loadTrip(currentTripId);
+    _animateAmounts = false;
     toast(`"${name}" added!`);
   }
 
@@ -5183,13 +6191,116 @@
     };
   }
 
+  function appConfirm(title, body, okLabel, onConfirm) {
+    document.getElementById('app-confirm-title').textContent = title;
+    document.getElementById('app-confirm-body').textContent = body;
+    document.getElementById('app-confirm-ok').textContent = okLabel || 'Update';
+    document.getElementById('app-confirm-modal').classList.add('open');
+    document.getElementById('app-confirm-ok').onclick = () => {
+      document.getElementById('app-confirm-modal').classList.remove('open');
+      onConfirm();
+    };
+    document.getElementById('app-confirm-cancel').onclick = () => {
+      document.getElementById('app-confirm-modal').classList.remove('open');
+    };
+  }
+
   async function deleteExpense(expId) {
     confirmDelete('Delete expense?', 'This action cannot be undone.', async () => {
       await fetch(`/api/expenses/${expId}`, { method: 'DELETE' });
+      _animateAmounts = true;
       await loadTrip(currentTripId);
+      _animateAmounts = false;
       toast('Expense deleted');
     });
   }
+
+  // ── EDIT FLIGHT PASSENGERS ──
+  let _editPaxExpId = null;
+  let _editPaxSelected = new Set();
+
+  function openEditFlightPax(expId) {
+    const exp = tripData.expenses.find(e => e.id === expId);
+    if (!exp) return;
+    _editPaxExpId = expId;
+    _editPaxSelected = new Set(exp.splits.map(sp => sp.member_id));
+    const list = document.getElementById('edit-pax-list');
+    list.innerHTML = tripData.members.map(m => `
+      <label class="pax-drop-item" style="padding:0.5rem 0.6rem;border-radius:8px">
+        <input type="checkbox" ${_editPaxSelected.has(m.id) ? 'checked' : ''}
+          onchange="toggleEditPaxMember('${m.id}', this.checked)" />
+        <span class="pax-avatar" style="background:${m.color || '#999'}">${(m.name || '?')[0].toUpperCase()}</span>
+        <span class="pax-name">${esc(m.name)}</span>
+      </label>
+    `).join('');
+    document.getElementById('edit-pax-modal').classList.add('open');
+  }
+
+  function toggleEditPaxMember(memberId, checked) {
+    if (checked) _editPaxSelected.add(memberId);
+    else _editPaxSelected.delete(memberId);
+  }
+
+  function editPaxSelectAll() {
+    _editPaxSelected = new Set(tripData.members.map(m => m.id));
+    // Re-check all checkboxes
+    document.querySelectorAll('#edit-pax-list input[type="checkbox"]').forEach(cb => cb.checked = true);
+  }
+
+  async function saveEditFlightPax() {
+    if (_editPaxSelected.size === 0) {
+      toast('Select at least one passenger');
+      return;
+    }
+    const exp = tripData.expenses.find(e => e.id === _editPaxExpId);
+    if (!exp) return;
+
+    // Per-person price from existing splits
+    const perPerson = exp.splits.length > 0 ? exp.splits[0].amount : exp.total_amount;
+    const newSplits = [..._editPaxSelected].map(mid => {
+      const old = exp.splits.find(s => s.member_id === mid);
+      return {
+        member_id: mid,
+        amount: perPerson,
+        paid: old ? (old.paid ? true : false) : false
+      };
+    });
+    const newTotal = perPerson * newSplits.length;
+
+    console.log('saveEditFlightPax:', { expId: _editPaxExpId, splits: newSplits, total: newTotal });
+    try {
+      const res = await fetch(`/api/expenses/${_editPaxExpId}/splits`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ splits: newSplits, total_amount: newTotal })
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error('Save pax failed:', res.status, txt);
+        toast('Failed to save — ' + res.status);
+        return;
+      }
+    } catch (err) {
+      console.error('Save pax fetch error:', err);
+      toast('Network error saving passengers');
+      return;
+    }
+
+    document.getElementById('edit-pax-modal').classList.remove('open');
+    _animateAmounts = true;
+    await loadTrip(currentTripId);
+    _animateAmounts = false;
+    toast('Flight passengers updated');
+  }
+
+  // Close edit-pax modal on overlay click
+  document.getElementById('edit-pax-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  document.getElementById('app-confirm-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
 
   async function toggleSplit(splitId, expId) {
     const res  = await fetch(`/api/splits/${splitId}/toggle`, { method: 'PATCH' });
@@ -5942,6 +7053,19 @@
 
   // ── MULTI-LEG FLIGHT STATE ──
   let flightLegsState = [{}];
+  let _flightType = 'multi'; // 'oneway' or 'multi'
+
+  function setFlightType(type) {
+    saveLegsState();
+    _flightType = type;
+    document.getElementById('ft-multi').classList.toggle('active', type === 'multi');
+    document.getElementById('ft-oneway').classList.toggle('active', type === 'oneway');
+    // When switching to one way, keep only the first leg
+    if (type === 'oneway' && flightLegsState.length > 1) {
+      flightLegsState = [flightLegsState[0]];
+    }
+    renderFlightLegs();
+  }
 
   function _showAirportChip(input, iata, city, country) {
     const inputId = input.id;
@@ -5979,9 +7103,14 @@
     const multi = flightLegsState.length > 1;
     const memberCount = tripData?.members?.length || 1;
 
+    const isMulti = _flightType === 'multi';
+
     container.innerHTML = flightLegsState.map((_, i) => `
       <div class="flight-leg-row" id="flight-leg-${i}">
-        <div class="leg-label">${multi ? `Flight\u00a0${i + 1}` : ''}</div>
+        ${multi ? `<div class="leg-label" style="flex:0 0 100%;font-size:0.72rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;justify-content:space-between">
+          Flight\u00a0${i + 1}
+          <button class="leg-remove-btn" onclick="removeFlightLeg(${i})" title="Remove leg">✕</button>
+        </div>` : ''}
         <div class="form-group" style="margin:0">
           <label>From</label>
           <div class="airport-input-wrap">
@@ -6001,11 +7130,19 @@
           </div>
         </div>
         ${i === 0 ? `
-          <div class="form-group" style="margin:0">
-            <label>Pax</label>
-            <input type="number" id="fl-adults" value="${Math.max(1, memberCount)}" min="1" max="9" style="margin:0;width:100%" />
-          </div>` : '<div></div>'}
-        ${multi ? `<button class="leg-remove-btn" onclick="removeFlightLeg(${i})" title="Remove leg">✕</button>` : '<div></div>'}
+          <div class="form-group pax-col" style="margin:0">
+            <label>Passengers</label>
+            <div class="pax-picker" id="pax-picker">
+              <button type="button" class="pax-btn" id="pax-btn" onclick="togglePaxDrop(event)">
+                <span id="pax-label">${memberCount} selected</span>
+              </button>
+              <div class="pax-drop" id="pax-drop"></div>
+            </div>
+          </div>
+          <div class="form-group search-col" style="margin:0">
+            <label>&nbsp;</label>
+            <button class="btn-primary" style="white-space:nowrap;border-radius:20px;height:38px;padding:0 1.5rem" onclick="searchAllFlights()">Search</button>
+          </div>` : ''}
       </div>
     `).join('');
 
@@ -6038,6 +7175,81 @@
         if (el) { el.value = s.dateLabel; el.dataset.isoDate = s.dateIso; }
       }
     });
+
+    // Show/hide "+ Add flight" button based on mode
+    const addBtn = document.getElementById('add-leg-btn');
+    if (addBtn) addBtn.style.display = isMulti ? '' : 'none';
+
+    // Init passenger picker
+    renderPaxDrop();
+  }
+
+  // ── PASSENGER PICKER ──
+  let _selectedPax = new Set(); // member IDs of selected passengers
+
+  function renderPaxDrop() {
+    const drop = document.getElementById('pax-drop');
+    if (!drop || !tripData?.members?.length) return;
+    // Default: select all members
+    if (_selectedPax.size === 0) {
+      tripData.members.forEach(m => _selectedPax.add(m.id));
+    }
+    drop.innerHTML = tripData.members.map(m => `
+      <label class="pax-drop-item" onclick="event.stopPropagation()">
+        <input type="checkbox" ${_selectedPax.has(m.id) ? 'checked' : ''}
+          onchange="togglePaxMember('${m.id}', this.checked)" />
+        <span class="pax-avatar" style="background:${m.color || '#999'}">${(m.name || '?')[0].toUpperCase()}</span>
+        <span class="pax-name">${esc(m.name)}</span>
+      </label>
+    `).join('') + `
+      <div class="pax-drop-actions">
+        <button class="pax-add-all" type="button" onclick="paxSelectAll()">Select all</button>
+      </div>`;
+    updatePaxLabel();
+  }
+
+  function togglePaxDrop(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('pax-drop');
+    if (drop) drop.classList.toggle('open');
+  }
+
+  function togglePaxMember(memberId, checked) {
+    if (checked) _selectedPax.add(memberId);
+    else _selectedPax.delete(memberId);
+    updatePaxLabel();
+  }
+
+  function paxSelectAll() {
+    if (!tripData?.members) return;
+    tripData.members.forEach(m => _selectedPax.add(m.id));
+    renderPaxDrop();
+    updatePaxLabel();
+  }
+
+  function updatePaxLabel() {
+    const label = document.getElementById('pax-label');
+    if (!label) return;
+    const count = _selectedPax.size;
+    const total = tripData?.members?.length || 0;
+    if (count === total && total > 0) {
+      label.textContent = `All (${count})`;
+    } else {
+      label.textContent = `${count} of ${total}`;
+    }
+  }
+
+  // Close pax dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    const picker = document.getElementById('pax-picker');
+    const drop = document.getElementById('pax-drop');
+    if (drop && drop.classList.contains('open') && picker && !picker.contains(e.target)) {
+      drop.classList.remove('open');
+    }
+  });
+
+  function getSelectedPaxIds() {
+    return [..._selectedPax];
   }
 
   function addFlightLeg() {
@@ -6064,16 +7276,18 @@
   }
 
   function openFlightSearch() {
-    if (!_canAddExpenses()) {
-      toast('Only the trip creator can search flights. Ask them to enable member contributions in trip settings.');
-      return;
-    }
     document.getElementById('flight-modal').classList.add('open');
     document.getElementById('flight-results').innerHTML = '';
+    _flightType = 'multi';
+    document.getElementById('ft-multi').classList.add('active');
+    document.getElementById('ft-oneway').classList.remove('active');
     flightLegsState = [{}];
+    // Reset passenger selection — default all members
+    _selectedPax = new Set();
+    if (tripData?.members) tripData.members.forEach(m => _selectedPax.add(m.id));
     renderFlightLegs();
 
-    // Default date = tomorrow
+    // Default depart date = tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const isoDate = tomorrow.toISOString().slice(0, 10);
@@ -6081,6 +7295,7 @@
     const label = new Date(+y, +m - 1, +d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const dtEl = document.getElementById('fl-date-0');
     if (dtEl) { dtEl.value = label; dtEl.dataset.isoDate = isoDate; }
+
   }
 
   function closeFlightModal() {
@@ -6133,7 +7348,11 @@
   }
 
   async function searchAllFlights() {
-    const adults = parseInt(document.getElementById('fl-adults').value) || 1;
+    if (_selectedPax.size === 0) {
+      toast('Select at least one passenger');
+      return;
+    }
+    const adults = _selectedPax.size;
 
     // Collect + validate all legs from live DOM
     const legs = flightLegsState.map((_, i) => ({
@@ -6186,16 +7405,18 @@
     // Disable the button immediately so double-taps don't double-add
     if (btnEl) { btnEl.disabled = true; }
 
-    const members = tripData.members;
-    const share = members.length > 0 ? flight.total_price / members.length : flight.total_price;
-    const splits = members.map(m => ({ member_id: m.id, amount: share, paid: false }));
+    const selectedIds = getSelectedPaxIds();
+    const flyingMembers = tripData.members.filter(m => selectedIds.includes(m.id));
+    const perPerson = flight.price_per_person || flight.total_price;
+    const groupTotal = flyingMembers.length > 0 ? perPerson * flyingMembers.length : perPerson;
+    const splits = flyingMembers.map(m => ({ member_id: m.id, amount: perPerson, paid: false }));
 
     const res = await fetch(`/api/trips/${currentTripId}/expenses`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: expenseName,
-        total_amount: flight.total_price,
+        total_amount: groupTotal,
         paid_by: null,
         splits: splits.length ? splits : [],
       }),
@@ -6227,16 +7448,38 @@
     }
 
     // Reload trip data silently in background
-    loadTrip(currentTripId);
+    _animateAmounts = true;
+    await loadTrip(currentTripId);
+    _animateAmounts = false;
+
+    // Prompt to update trip start date if flight departs on a different day
+    if (flight.depart) {
+      const flightDateIso = new Date(flight.depart).toISOString().slice(0, 10);
+      const tripStart = tripData?.start_date || '';
+      const datePromptKey = 'fs_date_prompted_' + currentTripId;
+      if (flightDateIso && flightDateIso !== tripStart && !sessionStorage.getItem(datePromptKey)) {
+        sessionStorage.setItem(datePromptKey, '1');
+        const flightDateLabel = new Date(flightDateIso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const tripStartLabel = tripStart
+          ? new Date(tripStart + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : null;
+        const title = 'Update trip start date?';
+        const body = tripStartLabel
+          ? `Your flight departs ${flightDateLabel}, but your trip starts ${tripStartLabel}.`
+          : `Your flight departs ${flightDateLabel}. Set this as your trip start date?`;
+        appConfirm(title, body, `Set to ${flightDateLabel}`, async () => {
+          await fetch(`/api/trips/${currentTripId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ..._authHeaders() },
+            body: JSON.stringify({ name: tripData.name, destination: tripData.destination || '', start_date: flightDateIso }),
+          });
+          tripData.start_date = flightDateIso;
+          toast('Trip start date updated to ' + flightDateLabel);
+        });
+      }
+    }
   }
 
-  document.getElementById('flight-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeFlightModal();
-  });
-
-  document.getElementById('lodging-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeLodging();
-  });
 
   // ── LODGING ──
 
@@ -6447,10 +7690,6 @@
   }
 
   function openLodging() {
-    if (!_canAddExpenses()) {
-      toast('Only the trip creator can search lodging. Ask them to enable member contributions in trip settings.');
-      return;
-    }
     document.getElementById('lodging-modal').classList.add('open');
 
     // Init custom date pickers (clone to reset listeners each open)
@@ -6736,7 +7975,9 @@
     const data = await res.json();
     if (data.error) { toast(data.error); return; }
     closeLodging();
+    _animateAmounts = true;
     await loadTrip(currentTripId);
+    _animateAmounts = false;
     toast('Lodging added to trip!');
   }
 

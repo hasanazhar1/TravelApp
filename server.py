@@ -1,6 +1,7 @@
 import sqlite3
 import uuid
 import os
+import re
 import ssl
 import certifi
 import time
@@ -671,6 +672,10 @@ def create_trip():
     with get_db() as conn:
         conn.execute('INSERT INTO trips (id, name, destination, start_date, owner_id) VALUES (?, ?, ?, ?, ?)',
                      (trip_id, name, data.get('destination') or '', start_date, user['id'] if user else None))
+        # Link trip to user account
+        if user:
+            conn.execute('INSERT OR IGNORE INTO user_trips (user_id, trip_id) VALUES (?, ?)',
+                         (user['id'], trip_id))
         # Auto-add the creator as the first member
         creator_name = (data.get('creator_name') or '').strip()
         if not creator_name and user:
@@ -679,7 +684,7 @@ def create_trip():
             member_id = str(uuid.uuid4())
             conn.execute('INSERT INTO members (id, trip_id, name, color) VALUES (?, ?, ?, ?)',
                          (member_id, trip_id, creator_name, COLORS[0]))
-    return jsonify(id=trip_id, name=name, destination=data.get('destination') or '')
+    return jsonify(id=trip_id, name=name, destination=data.get('destination') or '', owner_id=user['id'] if user else None)
 
 @app.patch('/api/trips/<trip_id>')
 def update_trip(trip_id):
@@ -772,16 +777,73 @@ def add_member(trip_id):
         conn.execute('INSERT INTO members (id, trip_id, name, color) VALUES (?, ?, ?, ?)',
                      (member_id, trip_id, name, color))
         expenses = conn.execute('SELECT * FROM expenses WHERE trip_id = ?', (trip_id,)).fetchall()
+        flight_re = re.compile(r'[A-Z]{3}\s*→\s*[A-Z]{3}')
         for exp in expenses:
-            current_count = conn.execute(
-                'SELECT COUNT(*) FROM expense_splits WHERE expense_id = ?', (exp['id'],)
-            ).fetchone()[0]
-            new_count = current_count + 1
-            equal_share = exp['total_amount'] / new_count
-            conn.execute('UPDATE expense_splits SET amount = ? WHERE expense_id = ?', (equal_share, exp['id']))
-            conn.execute('INSERT INTO expense_splits (id, expense_id, member_id, amount, paid) VALUES (?,?,?,?,0)',
-                         (str(uuid.uuid4()), exp['id'], member_id, equal_share))
+            is_flight = bool(flight_re.search(exp['name']))
+            if is_flight:
+                # Flight: each member pays per-person price, total increases
+                existing_splits = conn.execute(
+                    'SELECT amount FROM expense_splits WHERE expense_id = ? LIMIT 1', (exp['id'],)
+                ).fetchone()
+                per_person = existing_splits['amount'] if existing_splits else exp['total_amount']
+                conn.execute('INSERT INTO expense_splits (id, expense_id, member_id, amount, paid) VALUES (?,?,?,?,0)',
+                             (str(uuid.uuid4()), exp['id'], member_id, per_person))
+                new_total = per_person * conn.execute(
+                    'SELECT COUNT(*) FROM expense_splits WHERE expense_id = ?', (exp['id'],)
+                ).fetchone()[0]
+                conn.execute('UPDATE expenses SET total_amount = ? WHERE id = ?', (new_total, exp['id']))
+            else:
+                # Regular expense: split total equally among all members
+                current_count = conn.execute(
+                    'SELECT COUNT(*) FROM expense_splits WHERE expense_id = ?', (exp['id'],)
+                ).fetchone()[0]
+                new_count = current_count + 1
+                equal_share = exp['total_amount'] / new_count
+                conn.execute('UPDATE expense_splits SET amount = ? WHERE expense_id = ?', (equal_share, exp['id']))
+                conn.execute('INSERT INTO expense_splits (id, expense_id, member_id, amount, paid) VALUES (?,?,?,?,0)',
+                             (str(uuid.uuid4()), exp['id'], member_id, equal_share))
     return jsonify(id=member_id, name=name, color=color)
+
+@app.delete('/api/trips/<trip_id>/members/<member_id>')
+def delete_member(trip_id, member_id):
+    try:
+        with get_db() as conn:
+            member = conn.execute('SELECT * FROM members WHERE id = ? AND trip_id = ?', (member_id, trip_id)).fetchone()
+            if not member:
+                return jsonify(error='Member not found'), 404
+            # Remove their splits from all expenses
+            flight_re = re.compile(r'[A-Z]{3}\s*→\s*[A-Z]{3}')
+            expenses = conn.execute('SELECT * FROM expenses WHERE trip_id = ?', (trip_id,)).fetchall()
+            for exp in expenses:
+                had_split = conn.execute('SELECT id FROM expense_splits WHERE expense_id = ? AND member_id = ?',
+                                        (exp['id'], member_id)).fetchone()
+                if not had_split:
+                    continue
+                conn.execute('DELETE FROM expense_splits WHERE expense_id = ? AND member_id = ?',
+                             (exp['id'], member_id))
+                is_flight = bool(flight_re.search(exp['name']))
+                remaining = conn.execute('SELECT COUNT(*) FROM expense_splits WHERE expense_id = ?',
+                                         (exp['id'],)).fetchone()[0]
+                if remaining == 0:
+                    # No one left — delete the expense entirely
+                    conn.execute('DELETE FROM expenses WHERE id = ?', (exp['id'],))
+                elif is_flight:
+                    # Flight: reduce total by per-person price
+                    first = conn.execute('SELECT amount FROM expense_splits WHERE expense_id = ? LIMIT 1',
+                                         (exp['id'],)).fetchone()
+                    per_person = first['amount'] if first else 0
+                    new_total = per_person * remaining
+                    conn.execute('UPDATE expenses SET total_amount = ? WHERE id = ?', (new_total, exp['id']))
+                else:
+                    # Regular expense: re-split equally
+                    equal_share = exp['total_amount'] / remaining
+                    conn.execute('UPDATE expense_splits SET amount = ? WHERE expense_id = ?',
+                                 (equal_share, exp['id']))
+            conn.execute('DELETE FROM members WHERE id = ? AND trip_id = ?', (member_id, trip_id))
+        return jsonify(ok=True)
+    except Exception as e:
+        print(f'[ERROR] delete_member: {e}')
+        return jsonify(error=str(e)), 500
 
 # ── EXPENSES ──
 
@@ -798,7 +860,9 @@ def add_expense(trip_id):
             return jsonify(error='Trip not found'), 404
         # Permission check: only owner can add unless members_can_add is enabled
         user = _current_user()
-        if user and trip.get('owner_id') and trip['owner_id'] != user['id'] and not trip.get('members_can_add'):
+        trip_owner = trip['owner_id'] if 'owner_id' in trip.keys() else None
+        members_ok = trip['members_can_add'] if 'members_can_add' in trip.keys() else 0
+        if user and trip_owner and trip_owner != user['id'] and not members_ok:
             return jsonify(error='Only the trip creator can add expenses. Ask them to enable member contributions in trip settings.'), 403
         exp_id = str(uuid.uuid4())
         conn.execute('INSERT INTO expenses (id, trip_id, name, total_amount, paid_by) VALUES (?,?,?,?,?)',
@@ -825,6 +889,32 @@ def delete_expense(exp_id):
         conn.execute('DELETE FROM expenses WHERE id = ?', (exp_id,))
     return jsonify(ok=True)
 
+# ── UPDATE EXPENSE SPLITS (edit passengers) ──
+
+@app.route('/api/expenses/<exp_id>/splits', methods=['PUT'])
+def update_expense_splits(exp_id):
+    try:
+        data = request.json or {}
+        splits = data.get('splits', [])
+        total_amount = data.get('total_amount')
+        with get_db() as conn:
+            exp = conn.execute('SELECT * FROM expenses WHERE id = ?', (exp_id,)).fetchone()
+            if not exp:
+                return jsonify(error='Expense not found'), 404
+            # Remove old splits
+            conn.execute('DELETE FROM expense_splits WHERE expense_id = ?', (exp_id,))
+            # Insert new splits
+            for sp in splits:
+                conn.execute('INSERT INTO expense_splits (id, expense_id, member_id, amount, paid) VALUES (?,?,?,?,?)',
+                             (str(uuid.uuid4()), exp_id, sp['member_id'], float(sp['amount']), 1 if sp.get('paid') else 0))
+            # Update total amount if provided
+            if total_amount is not None:
+                conn.execute('UPDATE expenses SET total_amount = ? WHERE id = ?', (float(total_amount), exp_id))
+        return jsonify(ok=True)
+    except Exception as e:
+        print(f'[ERROR] update_expense_splits: {e}')
+        return jsonify(error=str(e)), 500
+
 # ── SPLITS ──
 
 @app.route('/api/splits/<split_id>/toggle', methods=['PATCH'])
@@ -842,11 +932,13 @@ def toggle_split(split_id):
 @app.get('/')
 @app.get('/trip/<path:subpath>')
 def index(subpath=None):
-    return send_from_directory('public', 'index.html')
+    resp = send_from_directory('public', 'index.html')
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return resp
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3000))
     keys_ok = bool(SERPAPI_KEY)
-    print(f'\n✈️  TripSplit running at http://localhost:{port}')
+    print(f'\n✈️  FundJet running at http://localhost:{port}')
     print(f'   Flight search: {"✅ SerpAPI connected" if keys_ok else "⚠️  No SerpAPI key — set SERPAPI_KEY env var"}\n')
     app.run(host='0.0.0.0', port=port, debug=False)
