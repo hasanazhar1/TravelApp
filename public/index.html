@@ -5,20 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FundJet — Group Travel Budget</title>
   <style>
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Light.otf') format('opentype'); font-weight: 300; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Semibold.otf') format('opentype'); font-weight: 600; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Text-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Semibold.otf') format('opentype'); font-weight: 600; font-style: normal; }
-    @font-face { font-family: 'SF Pro'; src: url('/fonts/SF-Pro-Display-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; }
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #ffffff;
+      --bg: #f0f0f0;
       --surface: #ffffff;
       --surface2: #ffffff;
       --border: #e8e8e8;
@@ -38,7 +30,7 @@
     }
 
     body {
-      font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -362,8 +354,9 @@
       cursor: pointer;
       border: none;
       border-radius: 8px;
+      font-family: 'Roboto', sans-serif;
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 500;
       padding: 0.75rem 1.5rem;
       transition: all 0.2s;
     }
@@ -412,15 +405,25 @@
     #app { display: none; }
 
     .topbar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem calc((100% - 1200px) / 2 + 1.5rem);
-      margin-top: 80px;
+      position: fixed;
+      top: 0;
+      left: 72px;
+      right: 0;
+      background: var(--bg);
+      border-bottom: none;
+      padding: 0 1.5rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 1rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+      z-index: 8999;
     }
 
     .topbar-left {
@@ -439,6 +442,9 @@
     .trip-destination {
       font-size: 0.85rem;
       color: var(--text2);
+    }
+    .trip-destination:empty {
+      display: none;
     }
 
     .share-box {
@@ -476,49 +482,56 @@
       gap: 2rem;
       align-items: start;
       max-width: 1200px;
-      margin: 0 auto;
+      margin-left: 72px;
+      margin-top: 60px;
+      background: #fff;
+      border-radius: 24px;
+      min-height: calc(100vh - 80px);
+      margin-right: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     @media (max-width: 768px) {
-      .main { grid-template-columns: 1fr; padding: 1rem; }
-      .topbar { padding: 1rem; }
+      .main { grid-template-columns: 1fr; padding: 1rem; margin-left: 72px; margin-top: 60px; background: #fff; border-radius: 24px; }
+      .topbar { padding: 0 1rem; }
     }
 
     /* ── SIDEBAR ── */
     .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
 
     .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+      background: #fff;
+      border: 1px solid #ebebeb;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
     .panel-header {
-      padding: 1rem 1.25rem;
+      padding: 1.1rem 1.25rem 0.7rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border);
+      border-bottom: none;
     }
 
     .panel-header h3 {
-      font-size: 0.9rem;
+      font-size: 1.05rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text2);
+      text-transform: none;
+      letter-spacing: 0;
+      color: #1a1a1a;
     }
 
-    .panel-body { padding: 1rem 1.25rem; }
+    .panel-body { padding: 0.5rem 1.25rem 1.1rem; }
 
     .member-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.6rem 0;
-      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 0;
+      border-bottom: 1px solid #f3f3f3;
     }
 
     .member-row:last-child { border-bottom: none; }
@@ -566,6 +579,7 @@
     .member-name { font-weight: 500; font-size: 0.95rem; }
 
     .member-balance {
+
       font-size: 0.85rem;
       font-weight: 600;
     }
@@ -584,71 +598,125 @@
 
     /* ── SUMMARY CARDS ── */
     .summary-grid {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
-    .stat-total-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.2rem;
-      background: var(--surface);
+    .stat-cards-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      background: #f0f0f0;
+      border-radius: 16px;
+      padding: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .stat-cards-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.6rem; }
+    }
+
+    .stat-card {
+      background: #f0f0f0;
       border: none;
-      border-radius: 24px;
-      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      padding: 1.2rem 1.3rem;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      position: relative;
     }
 
-    .stat-header-row {
+    .stat-card:hover {
+      background: #e8e8e8;
+    }
+
+    .stat-card.active {
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .stat-card-icon {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.1rem;
+      gap: 0.45rem;
+      margin-bottom: 0.5rem;
     }
 
-    .stat-total-label {
-      font-size: 0.78rem;
+    .stat-card-icon svg {
+      width: 16px;
+      height: 16px;
       color: var(--text2);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-weight: 600;
     }
 
-    /* Group / Me toggle */
-    .vm-toggle {
-      display: flex;
-      background: #f3f4f6;
-      border-radius: 8px;
-      padding: 3px;
-      gap: 0;
-    }
-    .vm-btn {
-      padding: 0.22rem 0.7rem;
-      border-radius: 5px;
-      border: none;
-      background: transparent;
-      font-size: 0.73rem;
-      font-weight: 700;
-      color: #9ca3af;
-      cursor: pointer;
-      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-      font-family: inherit;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-    }
-    .vm-btn.active {
-      background: #fff;
-      color: var(--accent);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .stat-total-value {
-      font-size: 3.4rem;
+    .stat-card-label {
+      font-size: 0.82rem;
+      color: var(--text2);
       font-weight: 400;
+      transition: font-weight 0.15s, color 0.15s;
+    }
+
+    .stat-card.active .stat-card-label {
+      font-weight: 500;
       color: var(--text);
-      line-height: 1.1;
+    }
+
+    .stat-card-value {
+      font-size: 2.4rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.15;
       letter-spacing: -0.02em;
       display: flex;
-      justify-content: center;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .stat-card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .stat-card-badge.positive {
+      background: rgba(22,163,74,0.08);
+      color: var(--green);
+    }
+
+    .stat-card-badge.neutral {
+      background: rgba(107,114,128,0.08);
+      color: var(--text2);
+    }
+
+    .stat-card-sub {
+      display: none;
+    }
+
+    .stat-card-covered {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(22,163,74,0.08);
+      color: var(--green);
+      margin-top: 0.4rem;
+    }
+
+    /* Legacy elements kept for JS compatibility */
+    .stat-total-wrap { display: none; }
+
+    .stat-total-value {
+      font-size: 2.4rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      display: flex;
     }
 
     .tick-digit {
@@ -675,6 +743,46 @@
       border-top: 1px solid var(--border);
       margin: 0.9rem 0 0.85rem;
       opacity: 0.5;
+    }
+
+    /* ── ACTION BAR ── */
+    .action-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .action-bar-btn {
+      background: #fff;
+      color: #1a1a1a;
+      border: 1.5px solid #efefef;
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .action-bar-btn:hover {
+      border-color: #d0d0d0;
+      background: #fafafa;
+    }
+
+    .action-bar-btn.primary {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
+
+    .action-bar-btn.primary:hover {
+      background: #333;
+      border-color: #333;
     }
 
     /* ── TRIP BANNERS (all trips) ── */
@@ -836,26 +944,22 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
+      gap: 0.35rem;
     }
 
     .cost-bar-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.76rem;
-      color: var(--text2);
-      font-weight: 500;
+      display: none;
     }
 
     .cost-bar-labels span:last-child {
-      color: var(--accent);
-      font-weight: 600;
+      color: var(--green);
+      font-weight: 500;
     }
 
     .cost-bar-track {
       width: 100%;
-      height: 10px;
-      background: #e8e8e8;
+      height: 6px;
+      background: #f3f3f3;
       border-radius: 99px;
       overflow: hidden;
     }
@@ -952,7 +1056,7 @@
       margin-bottom: 1rem;
     }
 
-    .expenses-header h2 { font-size: 1.1rem; font-weight: 700; }
+    .expenses-header h2 { font-size: 1.1rem; font-weight: 600; }
 
     .expense-section-label {
       font-size: 0.72rem;
@@ -973,17 +1077,17 @@
     }
 
     .expense-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 1rem;
+      background: #fff;
+      border: 1.5px solid #f0f0f0;
+      border-radius: 16px;
+      margin-bottom: 0.75rem;
       overflow: hidden;
       transition: border-color 0.2s, box-shadow 0.2s;
       cursor: pointer;
-      box-shadow: var(--shadow-xs);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
     }
 
-    .expense-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+    .expense-card:hover { border-color: #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
     .expense-header {
       padding: 1rem 1.25rem;
@@ -1003,6 +1107,7 @@
       flex-shrink: 0;
     }
     .expense-amount {
+
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--text);
@@ -1074,6 +1179,34 @@
       gap: 0.4rem;
       flex-shrink: 0;
     }
+    .expense-hover-actions {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      display: flex;
+      gap: 0.25rem;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .expense-card:hover .expense-hover-actions { opacity: 1; }
+
+    .expense-hover-btn {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      cursor: pointer;
+      color: var(--text2);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+      padding: 0;
+    }
+    .expense-hover-btn:hover { background: #f5f5f5; color: var(--text); border-color: #d0d0d0; }
+    .expense-hover-btn.danger:hover { color: var(--red); background: #fee2e2; border-color: #fca5a5; }
+
     .expense-delete-x {
       background: none;
       border: none;
@@ -1089,11 +1222,166 @@
     .expense-card:hover .expense-delete-x { opacity: 1; }
     .expense-delete-x:hover { color: var(--red); background: #fee2e2; }
 
+    /* Flight card layout */
+    .flight-card-title {
+      padding: 1rem 1.25rem 0.6rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      border-bottom: 1px solid #f0f0f0;
+      line-height: 1.3;
+    }
+
+    .flight-card-title .flight-date {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--text2);
+      margin-top: 0.15rem;
+    }
+
+    .flight-card-body {
+      padding: 0.75rem 1.25rem;
+    }
+
+    .flight-card-body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .flight-card-body .expense-amount-wrap {
+      align-items: flex-start !important;
+      text-align: left;
+    }
+
+    /* Flight settings dropdown */
+    .flight-settings-drop {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.2s ease;
+      border-top: none;
+    }
+
+    .flight-settings-drop.open {
+      max-height: 120px;
+      opacity: 1;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .flight-settings-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.55rem 1.25rem;
+      border: none;
+      background: none;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.12s;
+      text-align: left;
+    }
+
+    .flight-settings-option:hover {
+      background: #f8f8f8;
+    }
+
+    .flight-settings-option.danger {
+      color: var(--red);
+    }
+
+    .flight-settings-option.danger:hover {
+      background: rgba(220,38,38,0.04);
+    }
+
+    .flight-settings-option svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Inline delete confirm */
+    .flight-delete-confirm {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      background: #fef2f2;
+      border-top: 1px solid #fecaca;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.2s ease;
+    }
+
+    .flight-delete-confirm.open {
+      max-height: 60px;
+      opacity: 1;
+    }
+
+    .flight-delete-confirm span {
+      font-size: 0.78rem;
+      color: var(--red);
+      font-weight: 500;
+    }
+
+    .flight-delete-confirm button {
+      font-size: 0.72rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .flight-delete-yes {
+      background: var(--red);
+      color: #fff;
+      border: none;
+    }
+
+    .flight-delete-no {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid #e0e0e0;
+    }
+
+    /* Pax edit mode: remove buttons on splits */
+    .split-remove-x {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--red);
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0 0.2rem;
+      margin-left: auto;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+
+    .split-remove-x:hover {
+      opacity: 1;
+    }
+
+    .expense-card.pax-edit-mode .split-remove-x {
+      display: inline-flex;
+    }
+
     /* ── GRID VIEW ── */
-    .expenses-grid-mode #flights-list,
     .expenses-grid-mode #expenses-list {
       display: grid !important;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .expenses-grid-mode #flights-list {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 0.75rem;
     }
     .expenses-grid-mode .expense-section-label {
@@ -1134,20 +1422,8 @@
       padding-top: 0.5rem;
       margin-top: auto;
     }
-    .expenses-grid-mode .expense-delete-x {
-      position: absolute;
-      top: 0.4rem;
-      right: 0.4rem;
-    }
     .expenses-grid-mode .expense-card {
       position: relative;
-    }
-    .expenses-grid-mode .expense-card .tag {
-      font-size: 0.65rem;
-    }
-    .expenses-grid-mode .expense-card .btn-sm {
-      font-size: 0.65rem;
-      padding: 0.15rem 0.35rem;
     }
     .expenses-grid-mode .split-chip {
       padding: 0.2rem 0.4rem;
@@ -1284,8 +1560,8 @@
     .screen-overlay {
       display: none;
       position: fixed;
-      top: 80px;
-      left: 0;
+      top: 0;
+      left: 72px;
       right: 0;
       bottom: 0;
       z-index: 8000;
@@ -1648,12 +1924,14 @@
     }
 
     .flight-price-main {
+
       font-size: 1.15rem;
       font-weight: 700;
       color: var(--accent);
     }
 
     .flight-price-sub {
+
       font-size: 0.75rem;
       color: var(--text2);
     }
@@ -2395,11 +2673,13 @@
       flex-shrink: 0;
     }
     .lodging-price-main {
+
       font-size: 1rem;
       font-weight: 800;
       color: var(--text);
     }
     .lodging-price-sub {
+
       font-size: 0.72rem;
       color: var(--text2);
     }
@@ -2506,6 +2786,7 @@
     }
     .hist-handle:active { cursor: grabbing; box-shadow: 0 0 0 5px rgba(255,119,0,0.18); }
     #hist-price-labels {
+
       display: flex;
       justify-content: space-between;
       font-size: 0.73rem;
@@ -2731,49 +3012,51 @@
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      height: 80px;
+      bottom: 0;
+      width: 72px;
       z-index: 9000;
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      background: var(--bg);
+      border-right: none;
     }
 
     .dock-panel {
       display: flex;
+      flex-direction: column;
       align-items: center;
       height: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
+      padding: 1.2rem 0;
       gap: 0;
     }
 
     .nav-logo {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: center;
       flex-shrink: 0;
       cursor: pointer;
+      margin-bottom: 1.2rem;
+      margin-top: -0.4rem;
+      margin-left: -0.3rem;
+      gap: 0;
     }
-    .nav-logo img { width: 30px; height: 30px; border-radius: 6px; }
-    .nav-logo span { font-weight: 800; font-size: 1.05rem; color: #111; letter-spacing: -0.02em; }
+    .nav-logo img { width: 52px; height: 52px; border-radius: 12px; }
+    .nav-logo span { display: none; }
 
     .dock-spacer { flex: 1; }
 
-    /* Floating dock buttons (top-right, next to account) */
     .dock-nav-items {
       display: flex;
-      align-items: flex-start;
-      gap: 6px;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(0,0,0,0.09);
-      border-radius: 14px;
-      padding: 6px 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
-      margin-right: 0.75rem;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+      margin-right: 0;
     }
 
     .dock-item {
@@ -2781,59 +3064,72 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       background: transparent;
       cursor: pointer;
       flex-shrink: 0;
       outline: none;
-      border: 2px solid transparent;
+      border: none;
       padding: 0;
-      will-change: width, height;
-      transition: width 0.18s cubic-bezier(0.34,1.4,0.64,1),
-                  height 0.18s cubic-bezier(0.34,1.4,0.64,1),
-                  border-radius 0.18s cubic-bezier(0.34,1.4,0.64,1),
-                  border-color 0.18s;
+      color: #999;
+      transform: scale(1);
+      transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .dock-item:hover {
+      background: #e4e4e4;
+      color: #333;
+      transform: scale(1.1);
     }
 
     .dock-item svg {
-      width: 46%;
-      height: 46%;
+      width: 20px;
+      height: 20px;
       pointer-events: none;
       flex-shrink: 0;
     }
 
     .dock-item.active {
-      border-color: var(--accent);
+      background: rgba(54,166,255,0.12);
+      color: var(--accent);
     }
     .dock-item.active svg { color: var(--accent); stroke: var(--accent); }
 
-    .dock-item-label { display: none; }
+    .dock-item-label {
+      display: block;
+      font-size: 0.6rem;
+      font-weight: 500;
+      margin-top: 2px;
+      color: inherit;
+      text-align: center;
+    }
 
     .dock-tooltip {
       position: absolute;
-      top: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%) translateY(-4px);
-      background: #fff;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      color: #111;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-8px);
+      background: #1a1a1a;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      color: #fff;
       font-size: 11px;
-      font-weight: 400;
-      padding: 4px 10px;
+      font-weight: 500;
+      padding: 5px 12px;
       border-radius: 7px;
       white-space: nowrap;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.14s ease, transform 0.14s ease;
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       letter-spacing: 0.01em;
     }
     .dock-item:hover .dock-tooltip {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(-50%) translateX(0);
     }
 
     .nav-account {
@@ -2843,14 +3139,14 @@
       cursor: pointer;
       position: relative;
       user-select: none;
-      padding: 0.3rem 0.6rem;
-      border-radius: 8px;
+      padding: 0.35rem 0.6rem;
+      border-radius: 10px;
       transition: background 0.15s ease;
       flex-shrink: 0;
     }
     .nav-account:hover { background: #f5f5f5; }
     .nav-account .avatar-sm {
-      width: 28px; height: 28px; border-radius: 50%;
+      width: 30px; height: 30px; border-radius: 50%;
       background: var(--accent); color: #fff;
       font-size: 0.72rem; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
@@ -2870,7 +3166,7 @@
       top: calc(100% + 6px);
       right: 0;
       background: #fff;
-      border: 1px solid var(--border);
+      border: 1px solid #f0f0f0;
       border-radius: 10px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.10);
       min-width: 140px;
@@ -3217,14 +3513,20 @@
 
     /* ── TRIPS SCREEN ── */
     #screen-trips {
-      background: var(--bg);
+      background: #fff;
+      margin-left: 72px;
+      margin-top: 60px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      border-radius: 24px;
+      min-height: calc(100vh - 80px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     .trips-screen-inner {
       max-width: 900px;
       margin: 0 auto;
       padding: 2rem;
-      padding-top: 96px;
     }
 
     .trips-screen-header {
@@ -3450,7 +3752,7 @@
       align-items: center;
       gap: 0.55rem;
       position: sticky;
-      top: 80px;
+      top: 0;
       z-index: 10;
     }
     .trips-collapse-btn:hover { opacity: 0.8; }
@@ -3480,12 +3782,16 @@
     /* ── MAP SCREEN ── */
     #screen-map {
       position: fixed;
-      top: 80px;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 60px;
+      left: 72px;
+      margin-top: 0;
+      right: 10px;
+      bottom: 10px;
       z-index: 10;
       min-height: unset;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     #map-container {
@@ -3642,10 +3948,9 @@
 <div id="dock">
   <div class="dock-panel" id="dock-panel">
     <div class="nav-logo" onclick="showScreen('trips')">
-      <img src="/logoblue.jpg" alt="TS" />
+      <img src="/logo.png" alt="TS" />
       <span>FundJet</span>
     </div>
-    <div class="dock-spacer"></div>
     <div class="dock-nav-items" id="dock-nav-items">
       <button class="dock-item active" id="dock-dashboard" onclick="showScreen('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -3653,20 +3958,14 @@
       </button>
       <button class="dock-item" id="dock-trips" onclick="showScreen('trips')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-        <div class="dock-tooltip">Trips</div>
+        <div class="dock-tooltip">My Trips</div>
       </button>
       <button class="dock-item" id="dock-map" onclick="showScreen('map')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
         <div class="dock-tooltip">Map</div>
       </button>
     </div>
-    <div class="nav-account" id="nav-account" onclick="toggleNavAccountDrop(event)">
-      <div class="avatar-sm" id="nav-avatar">?</div>
-      <span class="nav-account-email" id="nav-email"></span>
-      <div class="nav-account-drop" id="nav-account-drop">
-        <button onclick="signOut()">Sign Out</button>
-      </div>
-    </div>
+    <div class="dock-spacer"></div>
   </div>
 </div>
 
@@ -3677,7 +3976,7 @@
     <div class="auth-card">
       <!-- Left brand panel -->
       <div class="auth-card-brand">
-        <img src="/logoblue.jpg" alt="FundJet" />
+        <img src="/logo.png" alt="FundJet" />
         <h2>FundJet</h2>
       </div>
       <!-- Right form panel -->
@@ -3714,10 +4013,6 @@
 <!-- TRIPS SCREEN -->
 <div id="screen-trips" class="screen">
   <div class="trips-screen-inner">
-    <div class="trips-screen-header">
-      <h1>My Trips</h1>
-    </div>
-
     <!-- Create & Join -->
     <button class="trips-collapse-btn" id="trips-collapse-btn" onclick="toggleTripsActions()">
       Create Trip or Join Trip <svg class="trips-chevron" id="trips-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
@@ -3781,16 +4076,24 @@
 </div>
 
 <!-- MAIN APP -->
-<div id="app">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div>
-        <div class="trip-name" id="trip-name-display"></div>
-        <div class="trip-destination" id="trip-dest-display"></div>
-      </div>
+<div class="topbar" id="app-topbar" style="display:none">
+  <div class="topbar-left">
+    <div>
+      <div class="trip-name" id="trip-name-display"></div>
+      <div class="trip-destination" id="trip-dest-display"></div>
     </div>
   </div>
+  <div style="flex:1"></div>
+  <div class="nav-account" id="nav-account" onclick="toggleNavAccountDrop(event)">
+    <div class="avatar-sm" id="nav-avatar">?</div>
+    <span class="nav-account-email" id="nav-email"></span>
+    <div class="nav-account-drop" id="nav-account-drop">
+      <button onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
 
+<div id="app">
   <div class="main">
     <!-- SIDEBAR -->
     <div class="sidebar">
@@ -3828,40 +4131,65 @@
     <div>
       <!-- Summary -->
       <div class="summary-grid" id="summary-grid">
-        <div class="stat-total-wrap">
-          <div class="stat-header-row">
-            <div class="stat-total-label" id="stat-total-label">Total Owed</div>
-            <div class="vm-toggle">
-              <button class="vm-btn active" id="vm-group" onclick="setViewMode('group')">Group</button>
-              <button class="vm-btn"        id="vm-me"    onclick="setViewMode('me')">Me</button>
+        <!-- Dual stat cards -->
+        <div class="stat-cards-row">
+          <div class="stat-card active" id="stat-card-group" onclick="setViewMode('group')">
+            <div class="stat-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span class="stat-card-label">Group Total</span>
+            </div>
+            <div class="stat-card-value">
+              <span id="stat-group-value">$0</span>
+            </div>
+            <div class="stat-card-sub" id="stat-group-sub"></div>
+            <div class="stat-card-covered" id="stat-group-covered"></div>
+            <div class="cost-bar-wrap" id="cost-bar-group" style="display:none;margin-top:0.6rem">
+              <div class="cost-bar-labels">
+                <span id="cost-bar-label-total"></span>
+                <span id="cost-bar-label-paid"></span>
+              </div>
+              <div class="cost-bar-track">
+                <div class="cost-bar-fill" id="cost-bar-fill"></div>
+              </div>
             </div>
           </div>
+          <div class="stat-card" id="stat-card-me" onclick="setViewMode('me')">
+            <div class="stat-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span class="stat-card-label">My Share</span>
+            </div>
+            <div class="stat-card-value">
+              <span id="stat-me-value">$0</span>
+            </div>
+            <div class="stat-card-sub" id="stat-me-sub"></div>
+            <div class="stat-card-covered" id="stat-me-covered"></div>
+            <div class="cost-bar-wrap" id="cost-bar-me" style="display:none;margin-top:0.6rem">
+              <div class="cost-bar-labels">
+                <span id="cost-bar-me-label-total"></span>
+                <span id="cost-bar-me-label-paid"></span>
+              </div>
+              <div class="cost-bar-track">
+                <div class="cost-bar-fill" id="cost-bar-me-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden legacy elements for JS compat -->
+        <div class="stat-total-wrap" style="display:none">
+          <div class="stat-total-label" id="stat-total-label">Total Owed</div>
           <div class="stat-total-value" id="stat-total">$0</div>
           <div class="stat-owed-sub" id="stat-owed-sub"></div>
           <hr class="stat-divider" id="stat-divider" style="display:none">
-          <div class="cost-bar-wrap" id="cost-bar-wrap" style="display:none">
-            <div class="cost-bar-labels">
-              <span id="cost-bar-label-total"></span>
-              <span id="cost-bar-label-paid"></span>
-            </div>
-            <div class="cost-bar-track">
-              <div class="cost-bar-fill" id="cost-bar-fill"></div>
-            </div>
-          </div>
+          <div class="cost-bar-wrap" id="cost-bar-wrap" style="display:none"></div>
         </div>
       </div>
 
-      <!-- Expenses -->
-      <div class="expenses-header">
-        <h2>Expenses</h2>
-        <div style="display:flex;gap:0.5rem">
-          <button class="btn-outline-accent btn-sm" style="border-top-left-radius:20px;border-bottom-left-radius:20px;padding-left:9px" onclick="openFlightSearch()"><img src="/download.png" width="18" height="18" style="display:block;flex-shrink:0"> Search Flights</button>
-          <button class="btn-outline-accent btn-sm" style="padding-left:9px" onclick="openLodging()"><img src="/download-1.png" width="18" height="18" style="display:block;flex-shrink:0;align-self:flex-end"> Find Lodging</button>
-          <button class="btn-primary btn-sm" onclick="openAddExpense()">+ Add Expense</button>
-          <button class="btn-sm" id="view-toggle-btn" onclick="toggleExpenseView()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.5rem;cursor:pointer;display:flex;align-items:center" title="Toggle view">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-          </button>
-        </div>
+      <!-- Action bar -->
+      <div class="action-bar">
+        <button class="action-bar-btn" onclick="openFlightSearch()"><img src="/download.png" width="16" height="16" style="display:block;flex-shrink:0"> Flights</button>
+        <button class="action-bar-btn" onclick="openLodging()"><img src="/download-1.png" width="16" height="16" style="display:block;flex-shrink:0"> Lodging</button>
+        <button class="action-bar-btn primary" onclick="openAddExpense()">+ Add Expense</button>
       </div>
 
       <!-- Flights: static, always visible -->
@@ -4257,6 +4585,19 @@
     document.getElementById('screen-trips').style.display  = name === 'trips'     ? 'block' : 'none';
     document.getElementById('screen-map').style.display    = name === 'map'       ? 'block' : 'none';
     document.getElementById('app').style.display           = name === 'dashboard' ? 'block' : 'none';
+    document.getElementById('app-topbar').style.display    = 'flex';
+
+    // Update topbar title based on screen
+    const topbarTitle = document.getElementById('trip-name-display');
+    const topbarDest = document.getElementById('trip-dest-display');
+    if (name === 'trips') {
+      topbarTitle.textContent = 'My Trips';
+      topbarDest.textContent = '';
+    } else if (name === 'map') {
+      topbarTitle.textContent = 'Map';
+      topbarDest.textContent = '';
+    }
+    // dashboard title is set by renderAll
 
     // Update dock active state
     ['trips','dashboard','map'].forEach(s => {
@@ -5184,6 +5525,7 @@
 
   function showAuthSection() {
     document.getElementById('dock').style.display = 'none';
+    document.getElementById('app-topbar').style.display = 'none';
     const _ob = document.getElementById('onboarding');
     _ob.classList.remove('ob-show');
     _ob.style.display = 'none';
@@ -5408,13 +5750,15 @@
     // Default view: creator sees Group, members see Me
     const isOwner = tripData.owner_id === _authUserId;
     setViewMode(isOwner ? 'group' : 'me', true);
+    // Always apply grid mode
+    document.querySelector('.main').classList.add('expenses-grid-mode');
     renderMembers();
     renderExpenses();
     renderSummary();
     renderBalances();
     // Dim expense buttons if member can't add
     const canAdd = _canAddExpenses();
-    document.querySelectorAll('.expenses-header .btn-primary, .expenses-header .btn-outline-accent').forEach(btn => {
+    document.querySelectorAll('.action-bar .action-bar-btn').forEach(btn => {
       btn.style.opacity = canAdd ? '' : '0.45';
       btn.style.pointerEvents = canAdd ? '' : 'auto'; // still clickable to show toast
     });
@@ -5477,10 +5821,8 @@
       datePart = rest.slice(dotIdx + 1).trim();
       rest = rest.slice(0, dotIdx).trim();
     }
-    // Remove parentheses from airline info
-    rest = rest.replace(/^\(/, '').replace(/\)$/, '').trim();
     let html = `<strong>${origin}</strong> <span style="color:var(--text2);font-weight:400">to</span> <strong>${dest}</strong>`;
-    if (datePart) html += ` <span style="color:var(--text2);font-weight:400">· ${esc(datePart)}</span>`;
+    if (datePart) html += `<span class="flight-date">${esc(datePart)}</span>`;
     return html;
   }
 
@@ -5502,31 +5844,75 @@
     const displayAmount = meMode && meSplit ? fmt(meSplit.amount) : fmt(exp.total_amount);
     const amountLabel = meMode ? 'my share' : 'total';
 
-    const editPaxBtn = isFlight
-      ? `<button class="btn-sm" style="background:none;border:1px solid var(--border);color:var(--text2);font-size:0.72rem;border-radius:8px;cursor:pointer;padding:0.2rem 0.5rem" onclick="event.stopPropagation();openEditFlightPax('${exp.id}')">✏️ Passengers</button>`
-      : '';
+    const settingsIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
+    const deleteIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+
+    const hoverActions = isFlight
+      ? `<div class="expense-hover-actions">
+           <button class="expense-hover-btn" onclick="event.stopPropagation();toggleFlightSettings('${exp.id}')" title="Settings">${settingsIcon}</button>
+         </div>`
+      : `<div class="expense-hover-actions">
+           <button class="expense-hover-btn danger" onclick="event.stopPropagation();deleteExpense('${exp.id}')" title="Delete">${deleteIcon}</button>
+         </div>`;
+
+    if (isFlight) {
+      const paxIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+      const trashIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
+      return `
+      <div class="expense-card" style="position:relative" data-exp-id="${exp.id}">
+        ${hoverActions}
+        <div class="flight-card-title">${formatFlightTitle(exp.name)}</div>
+        <div class="flight-card-body">
+          <div class="expense-amount-wrap">
+            <span class="expense-amount${_animateAmounts ? ' amt-pop' : ''}">${displayAmount}</span>
+          </div>
+          ${paidByMember ? `<div class="expense-meta">Paid by <strong>${esc(paidByMember.name)}</strong></div>` : ''}
+        </div>
+        <div class="flight-settings-drop" id="flight-settings-${exp.id}">
+          <button class="flight-settings-option" onclick="event.stopPropagation();flightPaxMode('${exp.id}')">
+            ${paxIcon} Passengers
+          </button>
+          <button class="flight-settings-option danger" onclick="event.stopPropagation();flightDeleteInline('${exp.id}')">
+            ${trashIcon} Delete Flight
+          </button>
+        </div>
+        <div class="flight-delete-confirm" id="flight-del-confirm-${exp.id}">
+          <span>Delete this flight?</span>
+          <button class="flight-delete-yes" onclick="event.stopPropagation();flightDeleteConfirm('${exp.id}')">Delete</button>
+          <button class="flight-delete-no" onclick="event.stopPropagation();flightDeleteCancel('${exp.id}')">Cancel</button>
+        </div>
+        <div class="splits-grid">
+          ${exp.splits.map(sp => {
+            const isMine = me && sp.member_id === me.id;
+            const chipClass = meMode && isMine ? 'mine' : '';
+            return `
+            <div class="split-chip ${sp.paid ? 'paid' : ''} ${chipClass}" data-is-other="${meMode && !isMine ? '1' : ''}" data-split-id="${sp.id}" data-member-id="${sp.member_id}" onclick="toggleSplit('${sp.id}','${exp.id}')" title="Click to toggle payment">
+              <div class="avatar" style="background:${sp.member_color};width:24px;height:24px;font-size:0.7rem">${sp.member_name[0].toUpperCase()}</div>
+              <span class="split-name">${esc(sp.member_name)}</span>
+              <span class="split-amount">${fmt(sp.amount)}</span>
+              <button class="split-remove-x" onclick="event.stopPropagation();removePaxFromFlight('${exp.id}','${sp.member_id}')" title="Remove">✕</button>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }
 
     return `
-      <div class="expense-card">
+      <div class="expense-card" style="position:relative">
+        ${hoverActions}
         <div class="expense-header">
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-              <span class="expense-title">${isFlight ? formatFlightTitle(exp.name) : esc(exp.name)}</span>
-              <span class="tag ${tagClass}">${tagText}</span>
-              ${editPaxBtn}
+              <span class="expense-title">${esc(exp.name)}</span>
             </div>
             <div class="expense-meta">
-              ${paidByMember ? `Paid by <strong>${esc(paidByMember.name)}</strong> · ` : ''}
-              ${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected
-              <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+              ${paidByMember ? `Paid by <strong>${esc(paidByMember.name)}</strong>` : ''}
             </div>
           </div>
           <div class="expense-actions">
             <div class="expense-amount-wrap">
               <span class="expense-amount${_animateAmounts ? ' amt-pop' : ''}">${displayAmount}</span>
-              <span class="expense-amount-label">${amountLabel}</span>
             </div>
-            <button class="expense-delete-x" onclick="deleteExpense('${exp.id}')" title="Delete">✕</button>
           </div>
         </div>
         <div class="splits-grid">
@@ -5687,7 +6073,7 @@
   let _viewMode = 'group';
   let _animateAmounts = false;
   let _skipExpenseAnim = false;
-  let _expenseViewMode = 'list'; // 'list' or 'grid'
+  let _expenseViewMode = 'grid'; // always grid
 
   function toggleExpenseView() {
     _expenseViewMode = _expenseViewMode === 'list' ? 'grid' : 'list';
@@ -5736,8 +6122,8 @@
   function setViewMode(mode, skipRender) {
     const wasMe = _viewMode === 'me';
     _viewMode = mode;
-    document.getElementById('vm-group').classList.toggle('active', mode === 'group');
-    document.getElementById('vm-me').classList.toggle('active', mode === 'me');
+    document.getElementById('stat-card-group').classList.toggle('active', mode === 'group');
+    document.getElementById('stat-card-me').classList.toggle('active', mode === 'me');
     // Don't reset _sumLastPaid — skip bar animation on tab switch
     if (!skipRender) {
       _rollSkipAnim = true;
@@ -5788,13 +6174,13 @@
   }
 
   // Slot-machine digit roller: each character rolls in one after the other
-  let _rollPrevChars = [];
+  const _rollPrevMap = new Map(); // per-element previous chars
   let _rollSkipAnim = false;
   function rollDigits(el, toVal, format) {
     const newStr = format(toVal);
     const newChars = newStr.split('');
-    const oldChars = _rollPrevChars;
-    _rollPrevChars = newChars;
+    const oldChars = _rollPrevMap.get(el) || [];
+    _rollPrevMap.set(el, newChars);
 
     // Build digit columns
     el.innerHTML = '';
@@ -5853,15 +6239,10 @@
       s + e.splits.reduce((ss, sp) => ss + (sp.paid ? sp.amount : 0), 0), 0);
     const owed  = total - paid;
 
-    // ── Me mode: compute personal figures ──
+    // ── Me figures ──
     const me = _myMember();
-    let displayOwed  = owed;
-    let displayTotal = total;
-    let displayPaid  = paid;
-    let labelText    = 'Total Owed';
-
-    if (_viewMode === 'me' && me) {
-      let myOwed = 0, myPaid = 0, myTotal = 0;
+    let myOwed = 0, myPaid = 0, myTotal = 0;
+    if (me) {
       for (const exp of tripData.expenses) {
         for (const sp of exp.splits) {
           if (sp.member_id === me.id) {
@@ -5870,64 +6251,32 @@
           }
         }
       }
-      displayOwed  = myOwed;
-      displayTotal = myTotal;
-      displayPaid  = myPaid;
-      labelText    = 'Your Share';
-    } else if (_viewMode === 'me' && !me) {
-      displayOwed = 0;
-      displayTotal = 0;
-      displayPaid = 0;
-      labelText = 'Your Share';
     }
 
-    // Label animates only once per session (not on every trip open)
-    if (!_labelAnimated) {
-      _labelAnimated = true;
-      splitTextAnimate(
-        document.getElementById('stat-total-label'),
-        labelText,
-        { charDelay: 22, duration: 0.55, cls: 'split-char-sm' }
-      );
-    } else {
-      document.getElementById('stat-total-label').textContent = labelText;
+    // ── Group card ──
+    const groupValEl = document.getElementById('stat-group-value');
+    const groupCoveredEl = document.getElementById('stat-group-covered');
+    if (groupValEl) rollDigits(groupValEl, owed, v => fmt(v));
+    if (groupCoveredEl) {
+      groupCoveredEl.textContent = total > 0 ? `${fmt(paid)} covered` : '';
+      groupCoveredEl.style.display = total > 0 ? '' : 'none';
     }
 
-    // Big number — digit-by-digit roll on every change
-    const totalEl = document.getElementById('stat-total');
-    if (totalEl) rollDigits(totalEl, displayOwed, v => fmt(v));
-
-    // Sub text
-    const subEl = document.getElementById('stat-owed-sub');
-    if (subEl) {
-      if (displayTotal === 0) {
-        subEl.textContent = '';
-        subEl.className = 'stat-owed-sub';
-      } else {
-        subEl.className = 'stat-owed-sub';
-        subEl.textContent = _viewMode === 'me' && me
-          ? `${fmt(displayPaid)} paid · ${fmt(displayTotal)} total share`
-          : `${fmt(total)} total`;
-      }
-    }
-
-    if (total !== _sumLastTotal) _sumLastTotal = total;
-
-    // ── Progress bar ──
-    const divider = document.getElementById('stat-divider');
-    const barWrap = document.getElementById('cost-bar-wrap');
+    // Group progress bar
+    const barGroupWrap = document.getElementById('cost-bar-group');
     const barFill = document.getElementById('cost-bar-fill');
     const lblPaid = document.getElementById('cost-bar-label-paid');
+    const lblTotal = document.getElementById('cost-bar-label-total');
 
-    if (displayTotal > 0) {
-      const pct = Math.min((displayPaid / displayTotal) * 100, 100);
-      divider.style.display = '';
-      barWrap.style.display = '';
+    if (total > 0) {
+      const pct = Math.min((paid / total) * 100, 100);
+      barGroupWrap.style.display = '';
+      if (lblTotal) lblTotal.textContent = `${fmt(total)} total`;
       if (_rollSkipAnim) {
-        lblPaid.textContent = `${fmt(displayPaid)} covered`;
-        lblPaid.dataset.tickVal = displayPaid;
+        lblPaid.textContent = `${fmt(paid)} covered`;
+        lblPaid.dataset.tickVal = paid;
       } else {
-        tickCount(lblPaid, displayPaid, v => `${fmt(v)} covered`);
+        tickCount(lblPaid, paid, v => `${fmt(v)} covered`);
       }
       if (_sumLastPaid === null) {
         barFill.style.transition = 'none';
@@ -5940,11 +6289,49 @@
         barFill.style.width = pct + '%';
       }
     } else {
-      divider.style.display = 'none';
-      barWrap.style.display = 'none';
+      barGroupWrap.style.display = 'none';
     }
 
-    _sumLastPaid = displayPaid;
+    // ── Me card ──
+    const meValEl = document.getElementById('stat-me-value');
+    const meCoveredEl = document.getElementById('stat-me-covered');
+    if (meValEl) rollDigits(meValEl, myOwed, v => fmt(v));
+    if (meCoveredEl) {
+      if (me && myTotal > 0) {
+        meCoveredEl.textContent = `${fmt(myPaid)} covered`;
+        meCoveredEl.style.display = '';
+      } else {
+        meCoveredEl.textContent = '';
+        meCoveredEl.style.display = 'none';
+      }
+    }
+
+    // Me progress bar
+    const barMeWrap = document.getElementById('cost-bar-me');
+    const barMeFill = document.getElementById('cost-bar-me-fill');
+    const lblMePaid = document.getElementById('cost-bar-me-label-paid');
+    const lblMeTotal = document.getElementById('cost-bar-me-label-total');
+
+    if (me && myTotal > 0) {
+      const mePct = Math.min((myPaid / myTotal) * 100, 100);
+      barMeWrap.style.display = '';
+      if (lblMeTotal) lblMeTotal.textContent = `${fmt(myTotal)} share`;
+      if (_rollSkipAnim) {
+        if (lblMePaid) { lblMePaid.textContent = `${fmt(myPaid)} covered`; lblMePaid.dataset.tickVal = myPaid; }
+      } else {
+        if (lblMePaid) tickCount(lblMePaid, myPaid, v => `${fmt(v)} covered`);
+      }
+      barMeFill.style.width = mePct + '%';
+    } else {
+      barMeWrap.style.display = 'none';
+    }
+
+    if (total !== _sumLastTotal) _sumLastTotal = total;
+    _sumLastPaid = paid;
+
+    // Legacy compat
+    const legacyTotalEl = document.getElementById('stat-total');
+    if (legacyTotalEl) legacyTotalEl.textContent = fmt(owed);
   }
 
   function renderBalances() {
@@ -6293,6 +6680,95 @@
     toast('Flight passengers updated');
   }
 
+  // ── FLIGHT SETTINGS DROPDOWN ──
+  function toggleFlightSettings(expId) {
+    const drop = document.getElementById('flight-settings-' + expId);
+    if (!drop) return;
+    // Close any other open flight settings
+    document.querySelectorAll('.flight-settings-drop.open').forEach(d => {
+      if (d.id !== 'flight-settings-' + expId) d.classList.remove('open');
+    });
+    // Close any open delete confirms
+    document.querySelectorAll('.flight-delete-confirm.open').forEach(d => d.classList.remove('open'));
+    // Exit any pax-edit-mode
+    document.querySelectorAll('.expense-card.pax-edit-mode').forEach(c => c.classList.remove('pax-edit-mode'));
+    drop.classList.toggle('open');
+  }
+
+  function flightPaxMode(expId) {
+    const card = document.querySelector(`.expense-card[data-exp-id="${expId}"]`);
+    if (!card) return;
+    // Close settings dropdown
+    const drop = document.getElementById('flight-settings-' + expId);
+    if (drop) drop.classList.remove('open');
+    // Toggle pax edit mode (shows X buttons on split chips)
+    card.classList.toggle('pax-edit-mode');
+  }
+
+  function flightDeleteInline(expId) {
+    // Close settings dropdown
+    const drop = document.getElementById('flight-settings-' + expId);
+    if (drop) drop.classList.remove('open');
+    // Show inline delete confirm
+    const confirm = document.getElementById('flight-del-confirm-' + expId);
+    if (confirm) confirm.classList.add('open');
+  }
+
+  async function flightDeleteConfirm(expId) {
+    await fetch(`/api/expenses/${expId}`, { method: 'DELETE' });
+    _animateAmounts = true;
+    await loadTrip(currentTripId);
+    _animateAmounts = false;
+    toast('Flight deleted');
+  }
+
+  function flightDeleteCancel(expId) {
+    const confirm = document.getElementById('flight-del-confirm-' + expId);
+    if (confirm) confirm.classList.remove('open');
+  }
+
+  async function removePaxFromFlight(expId, memberId) {
+    const exp = tripData.expenses.find(e => e.id === expId);
+    if (!exp) return;
+    const remaining = exp.splits.filter(sp => sp.member_id !== memberId);
+    if (remaining.length === 0) {
+      toast('Cannot remove the last passenger');
+      return;
+    }
+    const perPerson = exp.splits.length > 0 ? exp.splits[0].amount : exp.total_amount;
+    const newSplits = remaining.map(sp => ({
+      member_id: sp.member_id,
+      amount: perPerson,
+      paid: sp.paid ? true : false
+    }));
+    const newTotal = perPerson * newSplits.length;
+    try {
+      const res = await fetch(`/api/expenses/${expId}/splits`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ splits: newSplits, total_amount: newTotal })
+      });
+      if (!res.ok) {
+        toast('Failed to remove passenger');
+        return;
+      }
+    } catch (err) {
+      toast('Network error');
+      return;
+    }
+    _animateAmounts = true;
+    await loadTrip(currentTripId);
+    _animateAmounts = false;
+    toast('Passenger removed');
+  }
+
+  // Close flight settings when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.expense-hover-btn') && !e.target.closest('.flight-settings-drop')) {
+      document.querySelectorAll('.flight-settings-drop.open').forEach(d => d.classList.remove('open'));
+    }
+  });
+
   // Close edit-pax modal on overlay click
   document.getElementById('edit-pax-modal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('open');
@@ -6324,53 +6800,10 @@
       chip.classList.remove('unpaid');
     }
 
-    // Update the tag + progress bar for that expense card only
+    // Refresh summary after toggling a split
     const exp = tripData.expenses.find(e => e.id === expId);
     if (exp) {
-      const totalPaid = exp.splits.reduce((s, sp) => s + (sp.paid ? sp.amount : 0), 0);
-      const pct       = exp.total_amount > 0 ? Math.round((totalPaid / exp.total_amount) * 100) : 0;
-      const allPaid   = pct === 100;
-      const nonePaid  = pct === 0;
-      const tagClass  = allPaid ? 'tag-paid' : nonePaid ? 'tag-unpaid' : 'tag-partial';
-      const tagText   = allPaid ? 'All Paid' : nonePaid ? 'Unpaid' : `${pct}% Paid`;
-
-      // Find the card that contains this split chip and update its tag + bar
-      const card = chip ? chip.closest('.expense-card') : null;
-      if (card) {
-        // Update tag
-        const tag = card.querySelector('.tag');
-        if (tag) { tag.className = `tag ${tagClass}`; tag.textContent = tagText; }
-
-        // Update progress fill width directly — keeps the existing element so CSS transition fires
-        const fill = card.querySelector('.progress-fill');
-        if (fill) {
-          fill.style.width = `${pct}%`;
-          fill.style.background = allPaid ? 'var(--green)' : 'var(--accent)';
-        }
-
-        // Update only the text node in expense-meta, leaving the progress bar untouched
-        const meta = card.querySelector('.expense-meta');
-        if (meta) {
-          const paidByMember = tripData.members.find(m => m.id === exp.paid_by);
-          const firstTextNode = meta.firstChild;
-          const textContent = `${paidByMember ? `Paid by ` : ''}${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected`;
-          // Replace only text, not the progress bar child
-          Array.from(meta.childNodes).forEach(n => {
-            if (n.nodeType === Node.TEXT_NODE || (n.nodeType === Node.ELEMENT_NODE && n.tagName === 'STRONG')) n.remove();
-          });
-          const textBefore = document.createTextNode('');
-          meta.insertBefore(textBefore, meta.firstChild);
-          if (paidByMember) {
-            const strong = document.createElement('strong');
-            strong.textContent = paidByMember.name;
-            meta.insertBefore(document.createTextNode('Paid by '), meta.firstChild);
-            meta.insertBefore(strong, meta.childNodes[1]);
-            meta.insertBefore(document.createTextNode(` · ${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected`), meta.childNodes[2]);
-          } else {
-            meta.insertBefore(document.createTextNode(`${fmt(totalPaid)} of ${fmt(exp.total_amount)} collected`), meta.firstChild);
-          }
-        }
-      }
+      renderSummary();
     }
 
     renderSummary();
